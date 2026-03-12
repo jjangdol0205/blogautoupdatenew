@@ -160,12 +160,9 @@ export default function Home() {
                   className="flex-1 px-3 py-2 rounded-md border border-gray-200 text-sm focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none bg-white"
                 >
                   <option value="선택안함">카테고리 선택</option>
-                  <option value="IT/테크">IT/테크</option>
-                  <option value="맛집/카페">맛집/카페</option>
-                  <option value="여행/숙박">여행/숙박</option>
-                  <option value="뷰티/패션">뷰티/패션</option>
-                  <option value="경제/비즈니스">경제/비즈니스</option>
-                  <option value="생활/건강">생활/건강</option>
+                  <option value="시니어 건강">시니어 건강 (김쌤)</option>
+                  <option value="트로트">트로트 (김기자)</option>
+                  <option value="은퇴 경제">은퇴 경제 (전문가)</option>
                 </select>
 
                 <select
