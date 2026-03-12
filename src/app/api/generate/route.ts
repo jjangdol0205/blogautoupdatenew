@@ -174,11 +174,14 @@ export async function POST(req: Request) {
 
     const currentYear = new Date().getFullYear();
     const prompt = `
-\${personaGuidance}
+${personaGuidance}
 
 [입력 정보]
-- 주제/키워드: \${keyword}
-- 현재 연도: \${currentYear}년 (반드시 이 연도를 기준으로 최신 트렌드를 강력히 반영)
+- 주제/키워드: ${keyword}
+- 현재 연도: ${currentYear}년
+
+*** 매우 중요한 경고 ***
+반드시 사용자가 입력한 [주제/키워드]에 대해서만 집중적으로 핵심을 다루어야 합니다. 절대로 사용자의 키워드를 무시하고 엉뚱한 자체 주제(예: AI 기술 트렌드 등)로 빠지지 마세요!
 
 [공통 필수 준수 가이드]
 1. 분량과 깊이:
@@ -187,12 +190,11 @@ export async function POST(req: Request) {
 2. 클릭을 유도하되 호감 가는 직관적인 제목 (Title):
    - 너무 거창한 것보다는 "OOO, 모르면 손해보는 3가지 꿀팁" 등 독자가 클릭하고 싶어지는 호기심 자극 타이틀을 설정하세요.
 
-3. 시각적 요소 (고화질 사진 분산 배치 - 매우 중요!!):
-   - 썸네일은 알아서 들어가므로 무시하고, 본문에 삽입할 3장의 사진 위치를 지정하기 위해, 반드시 아래의 특수 예약어 3개를 글의 흐름에 맞게 1번씩만 정확히 삽입하세요.
-     * 첫 번째 서론(도입부) 직후: [IMAGE_1]
-     * 본론의 중간 지점: [IMAGE_2]
-     * 결론/마무리 부근: [IMAGE_3]
-   - 절대 <img> 태그 등을 임의로 사용하지 않고 위 3개의 텍스트 자체만 넣어야 합니다.
+3. 시각적 요소 및 썸네일 구조 (매우 중요!!):
+   - 블로그 원본의 필수 레이아웃은 무조건 '대제목 -> 가벼운 인사말 -> [썸네일 이미지] -> 본격적인 본문 내용' 순서여야 합니다. 
+   - 따라서 인사말이 끝나는 서론 직후에 반드시 [THUMBNAIL] 이라는 예약어를 단 1번 작성하세요.
+   - 그리고 본문 중간 중간에 추가 사진을 넣기 위해 [IMAGE_1], [IMAGE_2], [IMAGE_3] 예약어를 글쓰기 흐름에 맞게 1번씩 삽입하세요.
+   - 절대 <img> 태그 등을 임의로 사용하지 말고 오직 위 텍스트 예약어만 넣어야 합니다.
 
 4. 가독성을 극대화하는 세련된 구조:
    - **문단 길이는 최대 2~3문장**으로 짧게 끊어 쓰세요.
@@ -238,9 +240,10 @@ export async function POST(req: Request) {
     const protocol = req.headers.get('x-forwarded-proto') || 'http';
     const baseUrl = `${protocol}://${host}`;
 
-    // 썸네일 OG Image HTML (본문 최상단 주입용) - 네이버 에디터 인식을 위해 가짜 확장자 추가
+    // 썸네일 OG Image HTML (본문 주입용) - 네이버 에디터 인식을 위해 가짜 확장자 추가
+    const bgUrlParam = imageUrls.length > 0 ? `&bg=${encodeURIComponent(imageUrls[0])}` : '';
     const thumbnailHtml = `<div style="text-align: center; margin-bottom: 24px;">
-      <img src="${baseUrl}/api/og?title=${encodeURIComponent(parsedResult.title)}&ext=.png" alt="블로그 대표 썸네일" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);" />
+      <img src="${baseUrl}/api/og?title=${encodeURIComponent(parsedResult.title)}&type=${blogType}${bgUrlParam}&ext=.png" alt="블로그 대표 썸네일" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);" />
     </div>`;
 
     // 4. 프로그램 단에서 안전하게 [IMAGE_X] 치환하기 (중복 방지)
@@ -270,8 +273,15 @@ export async function POST(req: Request) {
         }
     }
 
-    // 본문 최상단에 썸네일 주입
-    parsedResult.content = thumbnailHtml + '\n' + finalContent;
+    // 썸네일 위치 치환
+    if (finalContent.includes('[THUMBNAIL]')) {
+        finalContent = finalContent.replace('[THUMBNAIL]', thumbnailHtml);
+    } else {
+        // 혹시 AI가 누락했다면 최상단에 주입
+        finalContent = thumbnailHtml + '\n' + finalContent;
+    }
+
+    parsedResult.content = finalContent;
 
     return NextResponse.json(parsedResult);
   } catch (error: unknown) {
