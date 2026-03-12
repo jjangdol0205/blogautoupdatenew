@@ -89,6 +89,7 @@ export async function POST(req: Request) {
     
     // [IMAGE_X] 플레이스홀더를 나중에 실제 태그로 치환할 예정이므로 주입용 텍스트 제거
     // 3. 본문 생성 메인 프롬프트 (가져온 사진 URL 직접 투입)
+    const currentYear = new Date().getFullYear();
     const prompt = `
 당신은 네이버 블로그 생태계를 완벽하게 이해하고 있는 '상위 1% 전문 지식 블로거이자 브랜딩 전문가'입니다.
 사용자가 제공하는 [주제/키워드]와 [말투]를 바탕으로, 가볍지 않고 **매우 세련되고(Sophisticated), 신뢰감을 주며, 읽는 이의 품격을 올려주는 프리미엄 네이버 블로그 포스팅 초안**을 작성해주세요.
@@ -96,6 +97,7 @@ export async function POST(req: Request) {
 [입력 정보]
 - 주제/키워드: ${keyword}
 - 말투/어조: ${tone}
+- 현재 연도: ${currentYear}년 (반드시 이 연도를 기준으로 가장 최신의 트렌드와 시대적 배경을 반영하여 작성하세요)
 
 [작성 가이드(매우 중요 - ★프리미엄 원고 타겟★)]
 
