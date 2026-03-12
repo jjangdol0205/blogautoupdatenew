@@ -5,7 +5,6 @@ import { Sparkles, Copy, CheckCircle2, PenTool, Loader2, AlertCircle, Lightbulb 
 
 export default function Home() {
   const [keyword, setKeyword] = useState("");
-  const [tone, setTone] = useState("데이터 기반 전문 분석가 (객관적, 팩트 체크 확실, ~입니다/합니다)");
   const [blogType, setBlogType] = useState("health");
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ keyword, tone, blogType }),
+        body: JSON.stringify({ keyword, blogType }),
       });
 
       const data = await response.json();
@@ -220,38 +219,41 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => setBlogType('health')}
-                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
                       blogType === 'health' 
-                        ? 'border-[#00c73c] bg-green-50 text-[#00c73c] ring-1 ring-[#00c73c]' 
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        ? 'border-[#00c73c] bg-[#f0fdf4] text-[#00c73c] shadow-sm ring-2 ring-[#00c73c] ring-offset-1' 
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="text-lg">🏥</span>
-                    <span>시니어 건강 (김쌤)</span>
+                    {blogType === 'health' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-[#00c73c]" />}
+                    <span className="text-2xl">🏥</span>
+                    <span className={blogType === 'health' ? 'font-bold' : ''}>시니어 건강 (김쌤)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setBlogType('trot')}
-                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
                       blogType === 'trot' 
-                        ? 'border-blue-500 bg-blue-50 text-blue-600 ring-1 ring-blue-500' 
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm ring-2 ring-blue-500 ring-offset-1' 
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="text-lg">🎤</span>
-                    <span>트롯 뉴스룸 (김기자)</span>
+                    {blogType === 'trot' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-blue-600" />}
+                    <span className="text-2xl">🎤</span>
+                    <span className={blogType === 'trot' ? 'font-bold' : ''}>트롯 뉴스 (김기자)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setBlogType('economy')}
-                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
                       blogType === 'economy' 
-                        ? 'border-purple-500 bg-purple-50 text-purple-600 ring-1 ring-purple-500' 
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm ring-2 ring-purple-500 ring-offset-1' 
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="text-lg">💰</span>
-                    <span>은퇴 경제 (전문가)</span>
+                    {blogType === 'economy' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-purple-600" />}
+                    <span className="text-2xl">💰</span>
+                    <span className={blogType === 'economy' ? 'font-bold' : ''}>은퇴 경제 (전문가)</span>
                   </button>
                 </div>
               </div>
@@ -269,23 +271,6 @@ export default function Home() {
                   className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
                   required
                 />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="tone" className="block text-sm font-semibold">
-                  글의 어조 (말투)
-                </label>
-                <select
-                  id="tone"
-                  value={tone}
-                  onChange={(e) => setTone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all appearance-none bg-white"
-                >
-                  <option value="데이터 기반 전문 분석가 (객관적, 팩트 체크 확실, ~입니다/합니다)">1. 팩트 기반 데이터 분석 (추천)</option>
-                  <option value="상위 1% 실무 전문가 (경험 바탕, 깊이 있는 통찰, ~해요/습니다)">2. 실무 전문가의 꿀팁</option>
-                  <option value="신뢰감 있는 리포트 형식 (논리적, 체계적, ~이다/한다)">3. 정통 리포트 형식</option>
-                  <option value="친근하지만 전문성 있는 선배 (경험 공유, 따뜻한 조언, ~해요)">4. 친근한 선배/멘토 톤</option>
-                </select>
               </div>
 
               {errorMsg && (
