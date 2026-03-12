@@ -19,13 +19,13 @@ export async function POST(req: Request) {
     // 1. 키워드를 바탕으로 고화질 무료 이미지(Unsplash)에서 검색할 영어 단어 추출
     let keywordGuidance = "";
     if (blogType === 'health') {
-      keywordGuidance = "특히 시니어 전문 건강/바이오 블로그에 어울리게, '병원(hospital)', '수술실(operating room)', '약(medicine)', '건강(health)', '운동(exercise)', '자연(nature)', '미소(smile)', '가족(family)' 등 시각적으로 따뜻하거나 전문적인 사물/풍경 단어를 선택하세요.";
+      keywordGuidance = "건강/라이프 블로그용이므로, 의학적/상징적 개념보다는 '신선한 과일(fresh fruits)', '채소(vegetables)', '풍경(nature landscape)', '따뜻한 차(warm tea)', '산책로(walking path)' 등 시각적으로 거부감 없고 따뜻한 사물/자연 영단어를 1~2개 선택하세요. 서양인들이 가득한 사무실 사진은 피하세요.";
     } else if (blogType === 'trot') {
-      keywordGuidance = "특히 트로트 메거진/가수 블로그에 어울리게, '콘서트 무대(concert stage)', '가수(singer)', '마이크(microphone)', '관중(crowd)', '음악(music)', '팬(fan)', '스포트라이트(spotlight)', '행복(happiness)' 등 시각적으로 화려하고 감동적인 사물/동작 단어를 선택하세요.";
+      keywordGuidance = "트로트 팬덤 블로그용이므로, '마이크(microphone)', '무대 조명(stage light)', '음표(music note)', '꽃다발(bouquet)', '반짝이는 배경(sparkle background)' 등 음악과 감동을 상징하는 화려하고 감성적인 사물 영단어를 선택하세요.";
     } else if (blogType === 'economy') {
-      keywordGuidance = "특히 시니어 은퇴설계/경제 블로그에 어울리게, '그래프(graph)', '차트(chart)', '돈(money)', '증권(stock market)', '동전(coins)', '지갑(wallet)', '부동산(real estate)', '은퇴(retirement)' 등 시각적으로 직관적인 경제 관련 사물/이미지를 선택하세요.";
+      keywordGuidance = "은퇴/경제 블로그용이므로, '동전(coins)', '저금통(piggy bank)', '계산기(calculator)', '지갑(wallet)', '자라나는 새싹(growing plant)', '커피잔(coffee cup)' 등 직관적이고 아기자기한 자산 관리 사물 영단어를 선택하세요. 서양인 회의실(office meeting) 사진은 절대 피하세요.";
     } else {
-      keywordGuidance = "특히, 추상적인 개념일 경우 사무실(office)이나 사람(people) 같은 밋밋한 사진이 나오지 않도록 시각적으로 직관적이고 상징적인 사물/풍경 단어를 선택하세요.";
+      keywordGuidance = "추상적인 개념일 경우 서양인 사무실(office) 사진이 나오지 않도록 시각적으로 직관적이고 상징적인 사물/풍경 단어를 선택하세요.";
     }
 
     const translatePrompt = `당신은 검색어에서 가장 핵심적이고 시각적인 이미지를 추출하는 프롬프트 엔지니어입니다. 
@@ -66,18 +66,18 @@ export async function POST(req: Request) {
       console.error("Failed to parse translatePrompt JSON:", e);
     }
 
-    // 2. Unsplash NAPI를 통해 실제 작동하는 고화질 사진 URL 3장 가져오기
+    // 2. Unsplash NAPI를 통해 실제 작동하는 고화질 사진 URL 2장 가져오기 (배경용 1장 + 본문용 1장)
     let imageUrls: string[] = [];
     
     async function fetchUnsplashImages(kw: string) {
       try {
-        const res = await fetch(`https://unsplash.com/napi/search/photos?query=${encodeURIComponent(kw)}&per_page=20&orientation=landscape`);
+        const res = await fetch(`https://unsplash.com/napi/search/photos?query=${encodeURIComponent(kw)}&per_page=15&orientation=landscape`);
         if (res.ok) {
           const json = await res.json();
-          if (json.results && json.results.length >= 3) {
+          if (json.results && json.results.length >= 2) {
             // 결과 배열을 랜덤하게 섞어서 매번 다른 사진이 나오도록 함
             const shuffled = json.results.sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, 3).map((r: { urls: { regular: string } }) => r.urls.regular);
+            return shuffled.slice(0, 2).map((r: { urls: { regular: string } }) => r.urls.regular);
           }
         }
       } catch (e) {
@@ -89,17 +89,16 @@ export async function POST(req: Request) {
     // 1차 시도: AI가 추출한 주력 키워드로 검색
     imageUrls = await fetchUnsplashImages(searchParams.primary);
     
-    // 2차 시도: 결과가 3장 미만이면, AI가 추출한 포괄적인 fallback 키워드로 재검색 (주제 일관성 유지)
-    if (imageUrls.length < 3) {
+    // 2차 시도: 결과가 2장 미만이면, AI가 추출한 포괄적인 fallback 키워드로 재검색 (주제 일관성 유지)
+    if (imageUrls.length < 2) {
        imageUrls = await fetchUnsplashImages(searchParams.fallback);
     }
 
-    // 3차 시도: 그래도 실패했다면 최후의 수단으로 절대 깨지지 않는 하드코딩된 고화질 이미지 3장 제공 (회색 고양이 동상 절대 방지)
-    if (imageUrls.length < 3) {
+    // 3차 시도: 그래도 실패했다면 최후의 수단으로 절대 깨지지 않는 하드코딩된 고화질 이미지 2장 제공
+    if (imageUrls.length < 2) {
        imageUrls = [
          "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1080&auto=format&fit=crop",
-         "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1080&auto=format&fit=crop",
-         "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1080&auto=format&fit=crop"
+         "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1080&auto=format&fit=crop"
        ];
     }
     
@@ -122,11 +121,11 @@ export async function POST(req: Request) {
    - [오프닝]: <blockquote> 태그를 사용해 먼저 독자의 안부를 묻고, 건강을 기원하는 따뜻한 조언(혹은 트로트 가사 차용)으로 출발합니다. 
    - [정보 전달]: 본론에 들어갈 때는 '바이오 투자자의 시선'처럼 아주 스마트하고 전문적인 의학/의료 지식을 풀어줍니다. 하지만 단어 자체는 중학생도 단번에 이해할 만큼 생활 밀착형 비유로 쉽게 씁니다.
    - [시각화]: 반드시 중요 정보(성분 비교, 수술 장단점 등)를 <table> 표 1개 이상으로 정리해서 한눈에 보이게 만드세요.
-   - [마무리]: "유튜브 '김쌤시니어성공시대'와 '든든한 김쌤'이 늘 청춘님들의 건강을 응원합니다. 🎵 오늘도 좋은 노래와 함께 건강 챙기세요!" 라는 문구를 반드시 넣어주세요.
+   - [마무리]: "유튜브 '김쌤의영웅라디오'와 '든든한 김쌤'이 늘 청춘님들의 건강을 응원합니다. 🎵 오늘도 좋은 노래와 함께 건강 챙기세요!" 라는 문구를 반드시 넣어주세요.
 
 해시태그 규칙:
 - 본문의 맨 마지막에 띄어쓰기로 구분하여 5~8개의 해시태그를 출력하세요. 
-- 그 안에는 반드시 '#시니어라이프 #주말힐링 #건강정보 #든든한김쌤 #김쌤시니어성공시대 #노래하는청춘' 이 포함되어야 합니다.
+- 그 안에는 반드시 '#시니어라이프 #주말힐링 #건강정보 #든든한김쌤 #김쌤의영웅라디오 #노래하는청춘' 이 포함되어야 합니다.
 `;
     } else if (blogType === 'trot') {
         personaGuidance = `
@@ -193,7 +192,7 @@ ${personaGuidance}
 3. 시각적 요소 및 썸네일 구조 (매우 중요!!):
    - 블로그 원본의 필수 레이아웃은 무조건 '대제목 -> 가벼운 인사말 -> [썸네일 이미지] -> 본격적인 본문 내용' 순서여야 합니다. 
    - 따라서 인사말이 끝나는 서론 직후에 반드시 [THUMBNAIL] 이라는 예약어를 단 1번 작성하세요.
-   - 그리고 본문 중간 중간에 추가 사진을 넣기 위해 [IMAGE_1], [IMAGE_2], [IMAGE_3] 예약어를 글쓰기 흐름에 맞게 1번씩 삽입하세요.
+   - 그리고 그림이 너무 많으면 글과 어울리지 않으므로, 본론의 중간 지점에 추가 사진을 딱 1장만 넣기 위해 [IMAGE_1] 예약어를 글쓰기 흐름에 맞게 1번 삽입하세요.
    - 절대 <img> 태그 등을 임의로 사용하지 말고 오직 위 텍스트 예약어만 넣어야 합니다.
 
 4. 가독성을 극대화하는 세련된 구조:
@@ -249,13 +248,14 @@ ${personaGuidance}
     // 4. 프로그램 단에서 안전하게 [IMAGE_X] 치환하기 (중복 방지)
     let finalContent = parsedResult.content;
     const usedImages = new Set<string>();
-
-    for (let i = 0; i < imageUrls.length; i++) {
-        const placeholder = `[IMAGE_${i+1}]`;
+    
+    // imageUrls[0]은 썸네일 배경으로 사용했으므로, imageUrls[1]부터 본문에 사용
+    for (let i = 1; i < imageUrls.length; i++) {
+        const placeholder = `[IMAGE_${i}]`;
         const imgUrl = imageUrls[i];
         
         // 치환용 HTML 템플릿
-        const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" alt="관련 설명 사진 ${i+1}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
+        const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" alt="관련 설명 사진 ${i}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
         
         // 플레이스홀더가 본문에 있으면 실제로 1번만 치환
         if (finalContent.includes(placeholder)) {
@@ -264,8 +264,8 @@ ${personaGuidance}
         }
     }
 
-    // 만약 AI가 플레이스홀더를 누락해서 남은 이미지가 있다면, 강제로 끝에 붙여줌
-    for (let i = 0; i < imageUrls.length; i++) {
+    // 만약 AI가 플레이스홀더를 누락해서 남은 이미지가 있다면, 강제로 끝에 붙여줌 (배경용 0번 제외)
+    for (let i = 1; i < imageUrls.length; i++) {
         const imgUrl = imageUrls[i];
         if (!usedImages.has(imgUrl)) {
             const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" alt="관련 설명 사진 추가" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
