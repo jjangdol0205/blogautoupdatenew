@@ -171,9 +171,9 @@ export async function POST(req: Request) {
     const protocol = req.headers.get('x-forwarded-proto') || 'http';
     const baseUrl = `${protocol}://${host}`;
 
-    // 썸네일 OG Image HTML (본문 최상단 주입용)
+    // 썸네일 OG Image HTML (본문 최상단 주입용) - 네이버 에디터 인식을 위해 가짜 확장자 추가
     const thumbnailHtml = `<div style="text-align: center; margin-bottom: 24px;">
-      <img src="${baseUrl}/api/og?title=${encodeURIComponent(parsedResult.title)}" alt="블로그 대표 썸네일" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);" />
+      <img src="${baseUrl}/api/og?title=${encodeURIComponent(parsedResult.title)}&ext=.png" alt="블로그 대표 썸네일" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);" />
     </div>`;
 
     // 4. 프로그램 단에서 안전하게 [IMAGE_X] 치환하기 (중복 방지)
