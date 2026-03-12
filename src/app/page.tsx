@@ -6,6 +6,7 @@ import { Sparkles, Copy, CheckCircle2, PenTool, Loader2, AlertCircle, Lightbulb 
 export default function Home() {
   const [keyword, setKeyword] = useState("");
   const [tone, setTone] = useState("데이터 기반 전문 분석가 (객관적, 팩트 체크 확실, ~입니다/합니다)");
+  const [blogType, setBlogType] = useState("health");
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
@@ -37,7 +38,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ keyword, tone }),
+        body: JSON.stringify({ keyword, tone, blogType }),
       });
 
       const data = await response.json();
@@ -214,6 +215,50 @@ export default function Home() {
             </h2>
             
             <form onSubmit={handleGenerate} className="space-y-6">
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold">
+                  블로그 종류 (페르소나) <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setBlogType('health')}
+                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                      blogType === 'health' 
+                        ? 'border-[#00c73c] bg-green-50 text-[#00c73c] ring-1 ring-[#00c73c]' 
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg">🏥</span>
+                    <span>시니어 건강 (김쌤)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBlogType('trot')}
+                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                      blogType === 'trot' 
+                        ? 'border-blue-500 bg-blue-50 text-blue-600 ring-1 ring-blue-500' 
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg">🎤</span>
+                    <span>트롯 뉴스룸 (김기자)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBlogType('economy')}
+                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center gap-1 ${
+                      blogType === 'economy' 
+                        ? 'border-purple-500 bg-purple-50 text-purple-600 ring-1 ring-purple-500' 
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg">💰</span>
+                    <span>은퇴 경제 (전문가)</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label htmlFor="keyword" className="block text-sm font-semibold">
                   핵심 키워드 또는 주제 <span className="text-red-500">*</span>
