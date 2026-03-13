@@ -224,11 +224,13 @@ ${personaGuidance}
    - **중요**: HTML 태그에 속성을 넣을 때는 큰따옴표(") 대신 **반드시 홑따옴표(')**를 사용하세요.
 
 [출력 형식 제한]
-반드시 아래의 JSON 형식으로만 응답해야 합니다. 다른 문장이나 부연 설명 마크다운 등을 절대 추가하지 마세요.
-{
-  "title": "[생성된 블로그 제목 (순수 텍스트)]",
-  "content": "[생성된 블로그 본문 (HTML 태그 및 해시태그가 모두 포함된 하나의 긴 문자열)]"
-}
+반드시 아래의 특수 구분자를 사용하여 제목과 본문을 나누어 작성하세요. JSON 형식은 절대 사용하지 마세요.
+[TITLE]
+(생성된 블로그 제목을 순수 텍스트로 1줄로 작성)
+[/TITLE]
+[CONTENT]
+(생성된 블로그 본문을 HTML 태그 및 해시태그가 모두 포함된 긴 텍스트로 작성)
+[/CONTENT]
 `;
 
     // Call Gemini 2.5 Flash model
@@ -236,7 +238,6 @@ ${personaGuidance}
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
-        responseMimeType: "application/json",
         temperature: 0.7, // slightly creative
         maxOutputTokens: 8192,
       },
@@ -249,11 +250,28 @@ ${personaGuidance}
     }
 
     let cleanText = textResponse.trim();
-    if (cleanText.startsWith("```")) {
-      cleanText = cleanText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+
+    // 구분자를 통해 정규식으로 파싱
+    let title = "제목을 생성하지 못했습니다.";
+    let generatedHtml = cleanText;
+    
+    const titleMatch = cleanText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i);
+    const contentMatch = cleanText.match(/\[CONTENT\]([\s\S]*?)\[\/CONTENT\]/i);
+
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1].trim();
+    }
+    if (contentMatch && contentMatch[1]) {
+      generatedHtml = contentMatch[1].trim();
+    } else if (cleanText.includes('[CONTENT]')) {
+      // 닫는 태그가 잘린 경우
+      generatedHtml = cleanText.split(/\[CONTENT\]/i)[1].trim();
     }
 
-    const parsedResult = JSON.parse(cleanText);
+    const parsedResult = {
+      title: title,
+      content: generatedHtml
+    };
 
     // Host & Protocol 구하기
     const host = req.headers.get('host') || 'localhost:3000';
