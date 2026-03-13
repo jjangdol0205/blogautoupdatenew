@@ -271,7 +271,8 @@ ${personaGuidance}
         const imgUrl = imageUrls[i];
         
         // 치환용 HTML 템플릿
-        const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" alt="관련 설명 사진 ${i}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
+        const proxyUrl = `${baseUrl}/api/proxy?url=${encodeURIComponent(imgUrl)}`;
+        const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${proxyUrl}" alt="관련 설명 사진 ${i}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
         
         // 플레이스홀더가 본문에 있으면 실제로 1번만 치환
         if (finalContent.includes(placeholder)) {
@@ -284,7 +285,8 @@ ${personaGuidance}
     for (let i = 1; i < imageUrls.length; i++) {
         const imgUrl = imageUrls[i];
         if (!usedImages.has(imgUrl)) {
-            const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" alt="관련 설명 사진 추가" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
+            const proxyUrl = `${baseUrl}/api/proxy?url=${encodeURIComponent(imgUrl)}`;
+            const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${proxyUrl}" alt="관련 설명 사진 추가" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
             finalContent += imgTag;
         }
     }
