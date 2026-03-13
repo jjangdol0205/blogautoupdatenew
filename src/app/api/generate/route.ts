@@ -213,10 +213,10 @@ ${personaGuidance}
 4. 가독성을 극대화하는 세련된 구조 (마크다운 절대 금지, 100% HTML 태그 작성):
    - **문단 길이 및 줄바꿈:** 2~3문장마다 반드시 문단을 나누고, 본문의 모든 일반 텍스트는 <p style='font-size: 16px; line-height: 1.8; margin-bottom: 26px; color: #333; letter-spacing: -0.5px;'>...</p> 태그로 감싸서 아주 읽기 편하게 만드세요.
    - **표(Table) 작성 규칙:** 마크다운 문법( |---| )은 화면이 깨지므로 절대 쓰지 마세요!! 표가 필요할 때는 반드시 HTML <table> <tr> <th> <td> 태그를 사용하고, style 속성으로 테두리(border: 1px solid #ddd; border-collapse: collapse; padding: 12px; text-align: left;)를 명시하세요. <th>에는 배경색(background-color: #f8f9fa;)도 넣으세요.
-   - **소제목 계층화 (필수):** 대주제와 소주제는 아래의 세련된 인라인 스타일을 정확히 복사해서 사용하세요.
-     ✅ 대주제 예시: <h2 style='font-size: 24px; font-weight: 800; color: #111; margin-top: 55px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #111;'>2. 대주제 타이틀</h2>
-     ✅ 소주제 예시: <h3 style='font-size: 20px; font-weight: 700; color: #333; margin-top: 35px; margin-bottom: 15px; padding-left: 14px; border-left: 4px solid #00c73c;'>2.1. 소주제 타이틀</h3>
-   - **리스트(List) 작성 규칙:** <ul> 태그에는 위아래 숨통을 트기 위해 반드시 <ul style='margin-top: 15px; margin-bottom: 35px; padding-left: 22px;'> 를 적용하세요. 그 안의 <li> 태그는 텍스트가 서로 붙지 않게 <li style='margin-bottom: 15px; line-height: 1.8; color: #333;'> 처럼 여백을 주고, 핵심 단어는 <strong style='color: #00c73c;'> 태그로 강조하세요.
+   - **소제목 계층화 (필수):** 대주제와 소주제 앞에는 '1.', '2.' 같은 딱딱한 번호를 절대 붙이지 마세요! 문맥이 자연스럽게 이어지도록 하고, 아래의 세련된 인라인 스타일을 정확히 복사해서 사용하세요.
+     ✅ 대주제 예시: <h2 style='font-size: 24px; font-weight: 800; color: #111; margin-top: 70px; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #111;'>대주제 타이틀 (번호 생략)</h2>
+     ✅ 소주제 예시: <h3 style='font-size: 20px; font-weight: 700; color: #333; margin-top: 60px; margin-bottom: 20px; padding-left: 14px; border-left: 4px solid #00c73c;'>소주제 타이틀 (번호 생략)</h3>
+   - **리스트(List) 작성 규칙:** <ul> 태그에는 위아래 숨통을 트기 위해 반드시 <ul style='margin-top: 15px; margin-bottom: 35px; padding-left: 22px;'> 를 적용하세요. 그 안의 <li> 태그는 본문과 글씨 크기가 다르게 튀지 않도록 <li style='font-size: 16px; letter-spacing: -0.5px; margin-bottom: 15px; line-height: 1.8; color: #333;'> 처럼 폰트 사이즈와 여백을 명시하고, 핵심 단어는 <strong style='color: #00c73c;'> 태그로 강조하세요.
    - **중요**: HTML 태그에 속성을 넣을 때는 큰따옴표(") 대신 **반드시 홑따옴표(')**를 사용하세요.
 
 [출력 형식 제한]
