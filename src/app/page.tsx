@@ -216,8 +216,8 @@ export default function Home() {
                   className="flex-1 px-3 py-2 rounded-md border border-gray-200 text-sm focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none bg-white"
                 >
                   <option value="선택안함">카테고리 선택</option>
-                  <option value="시니어 건강">시니어 건강 (김쌤)</option>
-                  <option value="트로트">트로트 (김기자)</option>
+                  <option value="지원금 마스터">지원금 마스터 (김쌤)</option>
+                  <option value="성수동 재개발">성수동 재개발 알리미 (김쌤)</option>
                   <option value="은퇴 경제">은퇴 경제 (전문가)</option>
                 </select>
 
@@ -283,8 +283,8 @@ export default function Home() {
                     }`}
                   >
                     {blogType === 'health' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-[#00c73c]" />}
-                    <span className="text-2xl">🏥</span>
-                    <span className={blogType === 'health' ? 'font-bold' : ''}>시니어 건강 (김쌤)</span>
+                    <span className="text-2xl">🎁</span>
+                    <span className={blogType === 'health' ? 'font-bold' : ''}>지원금 마스터 (김쌤)</span>
                   </button>
                   <button
                     type="button"
@@ -296,8 +296,8 @@ export default function Home() {
                     }`}
                   >
                     {blogType === 'trot' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-blue-600" />}
-                    <span className="text-2xl">🎤</span>
-                    <span className={blogType === 'trot' ? 'font-bold' : ''}>트롯 뉴스 (김기자)</span>
+                    <span className="text-2xl">🏗️</span>
+                    <span className={blogType === 'trot' ? 'font-bold' : ''}>성수동 재개발 알리미 (김쌤)</span>
                   </button>
                   <button
                     type="button"

@@ -73,41 +73,45 @@ export async function GET(request: Request) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
+              alignItems: 'flex-start', // 왼쪽 정렬 (유튜브 스타일)
               justifyContent: 'center',
               width: '100%',
-              maxWidth: '1050px',
-              textAlign: 'center',
+              height: '100%',
+              padding: '0 80px',
               zIndex: 10,
-              gap: '20px',
+              gap: '24px',
             }}
           >
-            {/* Category / Tag Text (Yellow with black stroke) */}
+            {/* Category / Tag Text (High contrast badge style) */}
             <div
               style={{
-                fontSize: 32,
-                color: '#FFEA00', // Bright Yellow
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#FFEB3B', // YouTube style yellow badge
+                color: '#000000',
+                fontSize: 28,
                 fontWeight: 900,
                 letterSpacing: '0.05em',
-                textShadow: strokeShadow,
-                lineHeight: 1.2,
-                wordBreak: 'keep-all',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
               }}
             >
               {tagText}
             </div>
 
-            {/* Main Title Text (White with black stroke) */}
+            {/* Main Title Text (White with heavy black stroke and shadow) */}
             <div
               style={{
-                fontSize: ogTitle.length > 25 ? 56 : 72,
+                fontSize: ogTitle.length > 20 ? 64 : 80, // 글씨를 더 크게
                 fontWeight: 900,
                 color: '#FFFFFF', // Pure White
-                lineHeight: 1.3,
+                lineHeight: 1.2,
                 wordBreak: 'keep-all',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.03em',
                 textShadow: strokeShadow,
-                padding: '0 40px',
+                maxWidth: '900px', // 가독성을 위해 너비 제한
               }}
             >
               {ogTitle}
