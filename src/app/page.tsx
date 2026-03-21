@@ -138,15 +138,28 @@ export default function Home() {
     
     let copySuccess = false;
 
-    // 1. Try modern Async Clipboard API (highest fidelity, supports HTML in most apps)
+    // 모바일 환경, 특히 네이버 블로그 앱 등에서의 완벽한 호환성(표, 사진 유지)을 위해
+    // 브라우저 네이티브 복사 명령어인 execCommand('copy')를 최우선으로 시도합니다.
+    // 이는 브라우저가 직접 OS 클립보드 포맷(RTF 등)에 맞게 HTML을 직렬화해주기 때문입니다.
     try {
-      if (navigator.clipboard && window.ClipboardItem) {
+      const result = document.execCommand('copy');
+      if (result) copySuccess = true;
+    } catch (err) {
+      console.warn('Primary execCommand failed:', err);
+    }
+
+    // 1차 시도(execCommand) 실패시 (일부 최신 PC 브라우저 등에서 제한될 때)
+    // 최신 Clipboard API로 Fallback 시도 (인코딩 메타태그 추가로 한글/스타일 깨짐 방지)
+    if (!copySuccess && navigator.clipboard && window.ClipboardItem) {
+      try {
         // Create both HTML and Text representations to satisfy strict apps like Naver Blog
         const html = el.innerHTML;
         // Naive text extraction
         const text = el.innerText || el.textContent || '';
         
-        const htmlBlob = new Blob([html], { type: 'text/html' });
+        const wrappedHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
+        
+        const htmlBlob = new Blob([wrappedHtml], { type: 'text/html' });
         const textBlob = new Blob([text], { type: 'text/plain' });
         const clipboardItem = new window.ClipboardItem({
           'text/html': htmlBlob,
@@ -155,18 +168,8 @@ export default function Home() {
         
         await navigator.clipboard.write([clipboardItem]);
         copySuccess = true;
-      }
-    } catch (err) {
-      console.warn('Modern Clipboard API failed or not supported:', err);
-    }
-
-    // 2. Fallback to execCommand if modern API failed or was blocked
-    if (!copySuccess) {
-      try {
-        const result = document.execCommand('copy');
-        if (result) copySuccess = true;
       } catch (err) {
-        console.error('Fallback execCommand failed:', err);
+        console.warn('Fallback Clipboard API failed:', err);
       }
     }
 
