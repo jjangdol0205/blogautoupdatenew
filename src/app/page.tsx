@@ -5,7 +5,6 @@ import { Sparkles, Copy, CheckCircle2, PenTool, Loader2, AlertCircle, Lightbulb 
 
 export default function Home() {
   const [keyword, setKeyword] = useState("");
-  const [blogType, setBlogType] = useState("health");
   const [deviceType, setDeviceType] = useState<'desktop'|'mobile'>('desktop');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -17,13 +16,33 @@ export default function Home() {
   
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  // Recommendation State
-  const [rcmdCategory, setRcmdCategory] = useState("선택안함");
-  const [rcmdTimeframe, setRcmdTimeframe] = useState("최근 1주일");
+  const [recommendations, setRecommendations] = useState<{keyword: string, monthlyTotalCnt: number}[]>([]);
   const [isRecommending, setIsRecommending] = useState(false);
-  const [recommendations, setRecommendations] = useState<string[]>([]);
   const [rcmdError, setRcmdError] = useState<string | null>(null);
 
+  const handleRecommend = async () => {
+    if (!keyword.trim()) return;
+    setIsRecommending(true);
+    setRcmdError(null);
+    setRecommendations([]);
+
+    try {
+      const response = await fetch('/api/recommend-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || '추천 키워드를 가져오는데 실패했습니다.');
+      }
+      setRecommendations(data.recommendations || []);
+    } catch (error: any) {
+      setRcmdError(error.message);
+    } finally {
+      setIsRecommending(false);
+    }
+  };
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -38,7 +57,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ keyword, blogType, deviceType }),
+        body: JSON.stringify({ keyword, deviceType }),
       });
 
       const data = await response.json();
@@ -85,43 +104,7 @@ export default function Home() {
     }
   };
 
-  const handleRecommend = async () => {
-    if (rcmdCategory === "선택안함") {
-      setRcmdError("카테고리를 선택해주세요.");
-      return;
-    }
-    
-    setIsRecommending(true);
-    setRcmdError(null);
-    setRecommendations([]);
 
-    try {
-      const response = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category: rcmdCategory, timeframe: rcmdTimeframe }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || '추천 키워드를 가져오는데 실패했습니다.');
-      }
-
-      setRecommendations(data.keywords || []);
-    } catch (error: unknown) {
-      console.error(error);
-      if (error instanceof Error) {
-        setRcmdError(error.message);
-      } else {
-        setRcmdError('알 수 없는 오류가 발생했습니다.');
-      }
-    } finally {
-      setIsRecommending(false);
-    }
-  };
 
   const handleSelectAllAndCopy = async (elementId: string, field: string) => {
     const el = document.getElementById(elementId);
@@ -205,204 +188,12 @@ export default function Home() {
         <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 max-w-6xl mx-auto">
           <section className="glass-panel p-8 delay-100 h-fit">
             
-            {/* 주제 추천 상자 */}
-            <div className="mb-8 p-5 bg-[#fafffb] border border-green-100 rounded-xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-[#00c73c]" />
-              <div className="flex items-center gap-2 mb-3">
-                <Lightbulb className="w-5 h-5 text-[#00c73c]" />
-                <h3 className="text-sm font-bold text-gray-800">트렌딩 주제 추천받기</h3>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <select
-                  value={rcmdCategory}
-                  onChange={(e) => setRcmdCategory(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-md border border-gray-200 text-sm focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none bg-white"
-                >
-                  <option value="선택안함">카테고리 선택</option>
-                  <option value="지원금 마스터">지원금 마스터 (김쌤)</option>
-                  <option value="인생 지혜와 인간관계">인생 지혜와 인간관계 (김쌤)</option>
-                  <option value="은퇴 경제">은퇴 경제 (김쌤)</option>
-                  <option value="기업분석 전문가">기업분석 전문가 (김쌤)</option>
-                  <option value="친절한 디지털 가이드">디지털·IT 가이드 (최실장)</option>
-                  <option value="숨은 투어 탐험가">숨은 명소 탐험가 (정투어)</option>
-                  <option value="인생 2막 홈가드닝">홈가드닝·취미 (조반장)</option>
-                  <option value="살림 9단 깐깐 리뷰어">생활용품 찐리뷰 (오여사)</option>
-                  <option value="시니어 댕냥이 집사">댕냥이 집사 (윤집사)</option>
-                </select>
-
-                <select
-                  value={rcmdTimeframe}
-                  onChange={(e) => setRcmdTimeframe(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-md border border-gray-200 text-sm focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none bg-white"
-                >
-                  <option value="최근 1주일">최근 1주일</option>
-                  <option value="최근 1개월">최근 1개월</option>
-                </select>
-                
-                <button
-                  type="button"
-                  onClick={handleRecommend}
-                  disabled={isRecommending || rcmdCategory === "선택안함"}
-                  className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center justify-center min-w-[80px]"
-                >
-                  {isRecommending ? <Loader2 className="w-4 h-4 animate-spin" /> : '추천받기'}
-                </button>
-              </div>
-
-              {rcmdError && (
-                 <p className="text-xs text-red-500 mb-2">{rcmdError}</p>
-              )}
-
-              {recommendations.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-green-50">
-                  <p className="text-xs text-muted mb-2 font-medium">✨ 키워드를 클릭하면 바로 입력됩니다</p>
-                  <div className="flex flex-wrap gap-2">
-                    {recommendations.map((rec, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setKeyword(rec)}
-                        className="px-3 py-1.5 bg-white border border-green-200 text-green-700 text-sm rounded-full hover:bg-green-50 transition-colors text-left"
-                      >
-                        {rec}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
             <h2 className="heading-2 mb-6 flex items-center gap-2">
               <PenTool className="w-6 h-6 text-[#00c73c]" />
               블로그 주제 입력
             </h2>
             
             <form onSubmit={handleGenerate} className="space-y-6">
-              <div className="space-y-3">
-                <label className="block text-sm font-semibold">
-                  블로그 종류 (페르소나) <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('health')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'health' 
-                        ? 'border-[#00c73c] bg-[#f0fdf4] text-[#00c73c] shadow-sm ring-2 ring-[#00c73c] ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'health' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-[#00c73c]" />}
-                    <span className="text-2xl">🎁</span>
-                    <span className={blogType === 'health' ? 'font-bold' : ''}>지원금 마스터 (김쌤)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('wisdom')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'wisdom' 
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm ring-2 ring-blue-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'wisdom' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-blue-600" />}
-                    <span className="text-2xl">📖</span>
-                    <span className={blogType === 'wisdom' ? 'font-bold' : ''}>인생 지혜와 인간관계</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('economy')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'economy' 
-                        ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm ring-2 ring-purple-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'economy' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-purple-600" />}
-                    <span className="text-2xl">💰</span>
-                    <span className={blogType === 'economy' ? 'font-bold' : ''}>은퇴 경제 (김쌤)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('corporate')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'corporate' 
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm ring-2 ring-indigo-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'corporate' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-red-600" />}
-                    <span className="text-2xl">🏢</span>
-                    <span className={blogType === 'corporate' ? 'font-bold' : ''}>기업분석 (김쌤)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('it')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'it' 
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm ring-2 ring-indigo-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'it' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-indigo-600" />}
-                    <span className="text-2xl">📱</span>
-                    <span className={blogType === 'it' ? 'font-bold' : ''}>디지털 가이드 (최실장)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('travel')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'travel' 
-                        ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm ring-2 ring-sky-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'travel' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-sky-600" />}
-                    <span className="text-2xl">🏕️</span>
-                    <span className={blogType === 'travel' ? 'font-bold' : ''}>국내 숨은 명소 (정투어)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('hobby')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'hobby' 
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm ring-2 ring-emerald-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'hobby' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-emerald-600" />}
-                    <span className="text-2xl">🪴</span>
-                    <span className={blogType === 'hobby' ? 'font-bold' : ''}>홈가드닝·취미 (조반장)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('review')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'review' 
-                        ? 'border-pink-500 bg-pink-50 text-pink-700 shadow-sm ring-2 ring-pink-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'review' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-pink-600" />}
-                    <span className="text-2xl">🛒</span>
-                    <span className={blogType === 'review' ? 'font-bold' : ''}>깐깐한 꿀템 (오여사)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBlogType('pet')}
-                    className={`relative px-4 py-4 rounded-xl border text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
-                      blogType === 'pet' 
-                        ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm ring-2 ring-orange-500 ring-offset-1' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {blogType === 'pet' && <CheckCircle2 className="w-5 h-5 absolute top-3 right-3 text-orange-600" />}
-                    <span className="text-2xl">🐶</span>
-                    <span className={blogType === 'pet' ? 'font-bold' : ''}>시니어 댕냥이 (윤집사)</span>
-                  </button>
-                </div>
-              </div>
-
               {/* 기기 타입 선택 */}
               <div className="space-y-3 pt-4 border-t border-gray-100">
                 <label className="block text-sm font-semibold">
@@ -439,8 +230,17 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="keyword" className="block text-sm font-semibold">
-                  핵심 키워드 또는 주제 <span className="text-red-500">*</span>
+                <label htmlFor="keyword" className="block text-sm font-semibold flex items-center justify-between">
+                  <span>핵심 키워드 또는 주제 <span className="text-red-500">*</span></span>
+                  <button 
+                    type="button" 
+                    onClick={handleRecommend}
+                    disabled={isRecommending || !keyword.trim()}
+                    className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors border border-blue-200 disabled:opacity-50"
+                  >
+                    {isRecommending ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Sparkles className="w-3.5 h-3.5"/>}
+                    연관 황금 키워드 조회
+                  </button>
                 </label>
                 <input
                   id="keyword"
@@ -451,6 +251,32 @@ export default function Home() {
                   className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
                   required
                 />
+                
+                {rcmdError && (
+                  <p className="text-xs text-red-500 mt-1">{rcmdError}</p>
+                )}
+                
+                {recommendations.length > 0 && (
+                  <div className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-lg animate-fade-in shadow-inner">
+                    <p className="text-xs font-bold text-gray-500 mb-3 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      원하는 황금 키워드를 클릭하여 적용하세요 (월간 검색량순 정렬)
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {recommendations.map((rec, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setKeyword(rec.keyword)}
+                          className="text-sm px-3 py-1.5 bg-white border border-gray-300 rounded-full hover:border-[#00c73c] hover:text-[#00c73c] transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                          <span className="font-semibold">{rec.keyword}</span>
+                          <span className="text-gray-400 text-xs text-nowrap">({rec.monthlyTotalCnt.toLocaleString()} 건)</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {errorMsg && (
