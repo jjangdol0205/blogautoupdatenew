@@ -76,11 +76,20 @@ export async function POST(req: Request) {
         };
     });
 
-    // Sort descending by total search volume
-    mappedKeywords.sort((a: any, b: any) => b.monthlyTotalCnt - a.monthlyTotalCnt);
+    // [니치 트래픽 고도화] 너무 거대한 키워드(초경쟁)와 너무 작은 키워드를 제외
+    // 황금 키워드 조건: 월간 검색량 500 ~ 50,000 사이
+    const nicheKeywords = mappedKeywords.filter((k: any) => {
+      return k.monthlyTotalCnt >= 500 && k.monthlyTotalCnt <= 50000;
+    });
+
+    // 필터링 결과가 너무 적으면 전체 키워드 풀 사용
+    const targetArray = nicheKeywords.length >= 12 ? nicheKeywords : mappedKeywords;
+
+    // [랜덤성 부여] 조회할 때마다 새로운 키워드가 나타나도록 무작위 셔플 후 상위 12개 추출
+    const shuffled = targetArray.sort(() => 0.5 - Math.random());
 
     // Return top 12 keywords
-    return NextResponse.json({ recommendations: mappedKeywords.slice(0, 12) });
+    return NextResponse.json({ recommendations: shuffled.slice(0, 12) });
   } catch (error: any) {
     console.error("Recommend Keywords API Error:", error);
     return NextResponse.json(

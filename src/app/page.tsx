@@ -232,27 +232,31 @@ export default function Home() {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
                   <label className="block text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-blue-600" />
-                    분야별 인기 유입 검색어 (추천받기)
+                    🔥 세대별/분야별 니치 트래픽 (랜덤 추천)
                   </label>
-                  <p className="text-xs text-blue-700 mb-3 opacity-90">아무것도 입력하지 않고 아래 관심 분야만 눌러도 네이버 실시간 트래픽 상위 키워드를 알아서 찾아옵니다.</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-xs text-blue-700 mb-4 opacity-90 leading-relaxed">
+                    단어를 직접 고민하지 마세요! 타겟 독자층을 클릭하면 <b>Naver 실제 검색 데이터</b>를 바탕으로 경쟁이 적고 트래픽이 높은 '황금 틈새 키워드'를 무작위로 계속 찾아줍니다.
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
                     {[
-                      { label: "맛집/카페 🍰", seed: "맛집" },
-                      { label: "국내여행 ✈️", seed: "가볼만한곳" },
-                      { label: "축제/행사 🎟️", seed: "축제" },
-                      { label: "IT/전자기기 💻", seed: "스마트폰" },
-                      { label: "주식/재테크 📈", seed: "주식" },
-                      { label: "패션/뷰티 👗", seed: "패션" }
+                      { label: "🍔 20대/맛집핫플", seed: "맛집" },
+                      { label: "💼 30대/재테크", seed: "투자" },
+                      { label: "👶 3040/육아용품", seed: "육아" },
+                      { label: "👗 뷰티/출근룩", seed: "패션" },
+                      { label: "✈️ 주말/국내여행", seed: "가볼만한곳" },
+                      { label: "💻 테크/기기리뷰", seed: "스마트폰" },
+                      { label: "🎟️ 핫이슈/축제", seed: "축제" },
+                      { label: "🏠 인테리어/리빙", seed: "인테리어" }
                     ].map((cat, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => handleRecommend(cat.seed)}
                         disabled={isRecommending}
-                        className="text-xs font-semibold px-3 py-2 bg-white text-blue-800 border-blue-200 border rounded-lg hover:border-blue-400 hover:bg-blue-100 transition-all shadow-sm"
+                        className="text-[13px] font-semibold px-3.5 py-2.5 bg-white text-blue-800 border-blue-200 border rounded-xl hover:border-blue-400 hover:bg-blue-100 hover:-translate-y-0.5 transition-all shadow-sm flex items-center gap-1 active:scale-95"
                       >
                         {cat.label}
                       </button>
