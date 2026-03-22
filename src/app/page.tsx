@@ -20,8 +20,10 @@ export default function Home() {
   const [isRecommending, setIsRecommending] = useState(false);
   const [rcmdError, setRcmdError] = useState<string | null>(null);
 
-  const handleRecommend = async () => {
-    if (!keyword.trim()) return;
+  const handleRecommend = async (seedKeyword?: string) => {
+    const targetKeyword = seedKeyword || keyword.trim();
+    if (!targetKeyword) return;
+    
     setIsRecommending(true);
     setRcmdError(null);
     setRecommendations([]);
@@ -30,7 +32,7 @@ export default function Home() {
       const response = await fetch('/api/recommend-keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword }),
+        body: JSON.stringify({ keyword: targetKeyword }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -229,28 +231,59 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="keyword" className="block text-sm font-semibold flex items-center justify-between">
-                  <span>핵심 키워드 또는 주제 <span className="text-red-500">*</span></span>
-                  <button 
-                    type="button" 
-                    onClick={handleRecommend}
-                    disabled={isRecommending || !keyword.trim()}
-                    className="text-xs flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors border border-blue-200 disabled:opacity-50"
-                  >
-                    {isRecommending ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Sparkles className="w-3.5 h-3.5"/>}
-                    연관 황금 키워드 조회
-                  </button>
-                </label>
-                <input
-                  id="keyword"
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="예: 다이어트 식단 추천, 강남역 맛집 내돈내산"
-                  className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
-                  required
-                />
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                  <label className="block text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                    분야별 인기 유입 검색어 (추천받기)
+                  </label>
+                  <p className="text-xs text-blue-700 mb-3 opacity-90">아무것도 입력하지 않고 아래 관심 분야만 눌러도 네이버 실시간 트래픽 상위 키워드를 알아서 찾아옵니다.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "맛집/카페 🍰", seed: "맛집" },
+                      { label: "국내여행 ✈️", seed: "가볼만한곳" },
+                      { label: "축제/행사 🎟️", seed: "축제" },
+                      { label: "IT/전자기기 💻", seed: "스마트폰" },
+                      { label: "주식/재테크 📈", seed: "주식" },
+                      { label: "패션/뷰티 👗", seed: "패션" }
+                    ].map((cat, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleRecommend(cat.seed)}
+                        disabled={isRecommending}
+                        className="text-xs font-semibold px-3 py-2 bg-white text-blue-800 border-blue-200 border rounded-lg hover:border-blue-400 hover:bg-blue-100 transition-all shadow-sm"
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-4 pt-4 border-t border-gray-100">
+                  <label htmlFor="keyword" className="block text-sm font-semibold flex items-center justify-between">
+                    <span>직접 핵심 키워드 검색 <span className="text-red-500">*</span></span>
+                    <button 
+                      type="button" 
+                      onClick={() => handleRecommend()}
+                      disabled={isRecommending || !keyword.trim()}
+                      className="text-xs flex items-center gap-1 bg-gray-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded-full transition-colors border border-gray-300 disabled:opacity-50 font-medium"
+                    >
+                      {isRecommending ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Sparkles className="w-3.5 h-3.5 text-gray-400"/>}
+                      입력한 단어 연관 검색
+                    </button>
+                  </label>
+                  <input
+                    id="keyword"
+                    type="text"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="예: 30대 여성 봄가디건, 대전 성심당 빵 추천"
+                    className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
+                    required
+                  />
+                </div>
+
                 
                 {rcmdError && (
                   <p className="text-xs text-red-500 mt-1">{rcmdError}</p>
