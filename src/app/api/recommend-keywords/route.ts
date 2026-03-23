@@ -76,14 +76,29 @@ export async function POST(req: Request) {
         };
     });
 
-    // [니치 트래픽 고도화] 너무 거대한 키워드(초경쟁)와 너무 작은 키워드를 제외
-    // 황금 키워드 조건: 월간 검색량 500 ~ 50,000 사이
-    const nicheKeywords = mappedKeywords.filter((k: any) => {
-      return k.monthlyTotalCnt >= 500 && k.monthlyTotalCnt <= 50000;
+    // [니치 트래픽 고도화] 진짜 '황금 틈새(롱테일) 키워드'만 강제 필터링
+    // 조건 1: 검색량은 200 ~ 15,000 사이 (초대형 인플루언서가 노리지 않는 빈집 타겟)
+    // 조건 2: 키워드 길이가 6글자 이상 (장외주식 -> X, 장외주식거래방법 -> O)
+    const strictNicheKeywords = mappedKeywords.filter((k: any) => {
+      const isNicheTraffic = k.monthlyTotalCnt >= 200 && k.monthlyTotalCnt <= 15000;
+      const isLongTail = k.keyword.length >= 6; // 구체적이고 긴 단어 조합만 살아남음
+      return isNicheTraffic && isLongTail;
     });
 
-    // 필터링 결과가 너무 적으면 전체 키워드 풀 사용
-    const targetArray = nicheKeywords.length >= 12 ? nicheKeywords : mappedKeywords;
+    // 1순위: 진짜 롱테일 + 빈집 키워드
+    let targetArray = strictNicheKeywords;
+
+    // 만약 너무 엄격해서 12개가 안 나오면, 검색량 조건만 유지하고 길이는 4글자 이상으로 완화
+    if (targetArray.length < 12) {
+       targetArray = mappedKeywords.filter((k: any) => 
+         k.monthlyTotalCnt >= 200 && k.monthlyTotalCnt <= 30000 && k.keyword.length >= 4
+       );
+    }
+
+    // 그래도 안 나오면 전체 풀 사용
+    if (targetArray.length < 12) {
+       targetArray = mappedKeywords;
+    }
 
     // [랜덤성 부여] 조회할 때마다 새로운 키워드가 나타나도록 무작위 셔플 후 상위 12개 추출
     const shuffled = targetArray.sort(() => 0.5 - Math.random());
