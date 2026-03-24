@@ -244,7 +244,7 @@ ${deviceType === 'mobile' ? "(생성된 블로그 본문을 <p>, <br>, <b> 태�
 [/CONTENT]
 `;
 
-    const response = await ai.models.generateContent({
+    const streamRes = await ai.models.generateContentStream({
       model: "gemini-2.5-pro",
       contents: prompt,
       config: {
@@ -253,29 +253,6 @@ ${deviceType === 'mobile' ? "(생성된 블로그 본문을 <p>, <br>, <b> 태�
         tools: [{ googleSearch: {} }] // 구글 검색을 통한 최신 타 블로그 글 분석 벤치마킹 활성화
       },
     });
-
-    const textResponse = response.text;
-    if (!textResponse) {
-      throw new Error("Empty response from AI");
-    }
-
-    let cleanText = textResponse.trim();
-    let title = "제목을 생성하지 못했습니다.";
-    let generatedHtml = cleanText;
-    
-    const titleMatch = cleanText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i);
-    const contentMatch = cleanText.match(/\[CONTENT\]([\s\S]*?)\[\/CONTENT\]/i);
-
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].trim();
-    }
-    if (contentMatch && contentMatch[1]) {
-      generatedHtml = contentMatch[1].trim();
-    } else if (cleanText.includes('[CONTENT]')) {
-      generatedHtml = cleanText.split(/\[CONTENT\]/i)[1].trim();
-    }
-
-    const parsedResult = { title: title, content: generatedHtml };
 
     const host = req.headers.get('host') || 'localhost:3000';
     const protocol = req.headers.get('x-forwarded-proto') || 'http';
@@ -297,40 +274,39 @@ ${deviceType === 'mobile' ? "(생성된 블로그 본문을 <p>, <br>, <b> 태�
       console.error("OG Thumbnail Generation Failed:", imgError);
     }
 
-    let finalContent = parsedResult.content;
-    const usedImages = new Set<string>();
-    
+    let processedImages: string[] = [];
     if (deviceType === 'desktop') {
-      for (let i = 1; i < imageUrls.length; i++) {
-          const placeholder = `[IMAGE_${i}]`;
-          const imgUrl = imageUrls[i];
-          const proxyUrl = `${baseUrl}/api/proxy?url=${encodeURIComponent(imgUrl)}`;
-          const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${proxyUrl}" alt="사진 ${i}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
-          
-          if (finalContent.includes(placeholder)) {
-              finalContent = finalContent.replace(placeholder, imgTag);
-              usedImages.add(imgUrl);
-          }
-      }
-
-      for (let i = 1; i < imageUrls.length; i++) {
-          const imgUrl = imageUrls[i];
-          if (!usedImages.has(imgUrl)) {
-              const proxyUrl = `${baseUrl}/api/proxy?url=${encodeURIComponent(imgUrl)}`;
-              const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${proxyUrl}" alt="사진 추가" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
-              finalContent += imgTag;
-          }
-      }
+      processedImages = imageUrls.slice(1).map(url => `${baseUrl}/api/proxy?url=${encodeURIComponent(url)}`);
     }
 
-    if (finalContent.includes('[THUMBNAIL]')) {
-        finalContent = finalContent.replace('[THUMBNAIL]', thumbnailHtml);
-    } else {
-        finalContent = thumbnailHtml + '\n' + finalContent;
-    }
+    const readable = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          const metaMsg = JSON.stringify({ type: 'meta', thumbnailHtml, images: processedImages });
+          controller.enqueue(encoder.encode(`data: ${metaMsg}\n\n`));
 
-    parsedResult.content = finalContent;
-    return NextResponse.json(parsedResult);
+          for await (const chunk of streamRes) {
+            if (chunk.text) {
+              const textMsg = JSON.stringify({ type: 'text', text: chunk.text });
+              controller.enqueue(encoder.encode(`data: ${textMsg}\n\n`));
+            }
+          }
+          controller.close();
+        } catch (e) {
+          console.error("Stream Error:", e);
+          controller.error(e);
+        }
+      }
+    });
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      }
+    });
   } catch (error: unknown) {
     console.error("Gemini API Error:", error);
     return NextResponse.json(

@@ -101,16 +101,109 @@ export default function Home() {
         body: JSON.stringify({ keyword: currentKeyword, deviceType, goodUrl, badUrl }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || '생성 중 오류가 발생했습니다.');
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || '생성 중 오류가 발생했습니다.');
       }
 
-      setResult(data);
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("스트림을 읽을 수 없습니다.");
+
+      const decoder = new TextDecoder();
+      let aiText = "";
+      let metaData: any = null;
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        
+        let boundary = buffer.indexOf('\n\n');
+        while (boundary !== -1) {
+           const message = buffer.substring(0, boundary);
+           buffer = buffer.substring(boundary + 2);
+           
+           if (message.startsWith('data: ')) {
+               try {
+                   const data = JSON.parse(message.substring(6));
+                   if (data.type === 'meta') {
+                       metaData = data;
+                   } else if (data.type === 'text') {
+                       aiText += data.text;
+                       
+                       let currentTitle = "블로그 타이틀 작성 중...";
+                       const titleMatch = aiText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i);
+                       if (titleMatch) {
+                           currentTitle = titleMatch[1].trim();
+                       } else if (aiText.includes('[TITLE]')) {
+                           currentTitle = aiText.split(/\[TITLE\]/i)[1].trim(); 
+                       }
+
+                       let currentContent = aiText;
+                       if (aiText.includes('[CONTENT]')) {
+                           currentContent = aiText.split(/\[CONTENT\]/i)[1] || "";
+                       }
+                       currentContent = currentContent.replace(/\[\/CONTENT\]/i, '').trim();
+
+                       if (metaData) {
+                           if (currentContent.includes('[THUMBNAIL]')) {
+                               currentContent = currentContent.replace('[THUMBNAIL]', metaData.thumbnailHtml);
+                           } else if (metaData.thumbnailHtml) {
+                               currentContent = metaData.thumbnailHtml + '<br/>' + currentContent;
+                           }
+                           
+                           if (metaData.images && metaData.images.length > 0) {
+                               metaData.images.forEach((imgUrl: string, idx: number) => {
+                                   const ph = `[IMAGE_${idx+1}]`;
+                                   const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
+                                   if (currentContent.includes(ph)) {
+                                       currentContent = currentContent.replace(ph, imgTag);
+                                   }
+                               });
+                           }
+                       }
+                       
+                       setResult({ title: currentTitle, content: currentContent + '<span className="inline-block w-2 h-4 ml-1 bg-[#00c73c] animate-pulse"></span>' });
+                   }
+               } catch(e) { console.error("SSE parse error", e, message); }
+           }
+           boundary = buffer.indexOf('\n\n');
+        }
+      }
+
+      // 텍스트 스트리밍 완료 후 최종 구조 완성 처리
+      let finalContent = aiText;
+      if (finalContent.includes('[CONTENT]')) finalContent = finalContent.split(/\[CONTENT\]/i)[1] || "";
+      finalContent = finalContent.replace(/\[\/CONTENT\]/i, '').trim();
+      
+      if (metaData) {
+          if (finalContent.includes('[THUMBNAIL]')) {
+              finalContent = finalContent.replace('[THUMBNAIL]', metaData.thumbnailHtml);
+          } else {
+              finalContent = metaData.thumbnailHtml + '<br/>' + finalContent;
+          }
+          
+          if (metaData.images) {
+              metaData.images.forEach((imgUrl: string, idx: number) => {
+                  const ph = `[IMAGE_${idx+1}]`;
+                  const imgTag = `<div style="text-align: center; margin: 32px 0;"><img src="${imgUrl}" style="max-width: 100%; height: auto; border-radius: 8px;"></div>`;
+                  if (finalContent.includes(ph)) {
+                     finalContent = finalContent.replace(ph, imgTag);
+                  } else {
+                     finalContent += imgTag; // 누락된 사진들을 맨 밑에 추가
+                  }
+              });
+          }
+      }
+      
+      const finalTitle = aiText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i)?.[1]?.trim() || "제목 완성";
+      setResult({ title: finalTitle, content: finalContent });
+
     } catch (error: unknown) {
       console.error(error);
       if (error instanceof Error) {
+        if (error.name === 'AbortError') return;
         setErrorMsg(error.message);
       } else {
         setErrorMsg('알 수 없는 오류가 발생했습니다.');
