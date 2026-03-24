@@ -6,8 +6,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const top = searchParams.get('top') || '블로그 왕초보 필수';
-    const mid = searchParams.get('mid') || '썸네일';
-    const bottom = searchParams.get('bottom') || '5분 완성';
+    const mid = searchParams.get('mid') || '블로그';
+    const bottom = searchParams.get('bottom') || '챌린지';
+
+    // 해시태그 형식으로 변환 (앞에 #이 없으면 단어별로 # 추가)
+    const topTags = top.includes('#') ? top : `#${top.split(' ').filter(t => t.trim() !== '').join(' #')}`;
 
     return new ImageResponse(
       (
@@ -16,129 +19,101 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#00C73C', // Naver Green similar
+            backgroundColor: '#38A169', // 산뜻한 녹색 바탕
             fontFamily: 'sans-serif',
             position: 'relative',
-            padding: '80px',
+            overflow: 'hidden',
           }}
         >
-          {/* Top Left Quote */}
-          <div style={{ position: 'absolute', top: '90px', left: '100px', display: 'flex' }}>
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="#111111" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 4v7h-4v-7h4zm2-2h-8v11h4c0 3.309-2.691 6-6 6v2c4.411 0 8-3.589 8-8v-9zm11 2v7h-4v-7h4zm2-2h-8v11h4c0 3.309-2.691 6-6 6v2c4.411 0 8-3.589 8-8v-9z"/>
-            </svg>
+          {/* Background Text Pattern */}
+          <div style={{ position: 'absolute', top: '-10px', left: '40px', display: 'flex', fontSize: 130, fontWeight: 900, color: 'rgba(0, 0, 0, 0.04)', letterSpacing: '0.05em' }}>
+            BLOG POST
+          </div>
+          <div style={{ position: 'absolute', bottom: '-10px', right: '40px', display: 'flex', fontSize: 130, fontWeight: 900, color: 'rgba(0, 0, 0, 0.04)', letterSpacing: '0.05em' }}>
+            BLOG POST
           </div>
 
-          {/* Bottom Right Quote */}
-          <div style={{ position: 'absolute', bottom: '90px', right: '100px', display: 'flex', transform: 'rotate(180deg)' }}>
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="#111111" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 4v7h-4v-7h4zm2-2h-8v11h4c0 3.309-2.691 6-6 6v2c4.411 0 8-3.589 8-8v-9zm11 2v7h-4v-7h4zm2-2h-8v11h4c0 3.309-2.691 6-6 6v2c4.411 0 8-3.589 8-8v-9z"/>
-            </svg>
-          </div>
-
-          {/* Top Line */}
-          <div style={{ position: 'absolute', top: '150px', left: '260px', right: '100px', height: '8px', backgroundColor: '#111111' }} />
-          
-          {/* Bottom Line */}
-          <div style={{ position: 'absolute', bottom: '150px', left: '100px', right: '260px', height: '8px', backgroundColor: '#111111' }} />
-
+          {/* Inner White Rounded Card */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-              textAlign: 'center',
-              zIndex: 10,
-              gap: '40px',
+              backgroundColor: '#FFFFFF',
+              width: '880px',
+              height: '880px',
+              borderRadius: '120px', // 매우 둥근 사각형
+              boxShadow: '0 40px 80px rgba(0,0,0,0.15)',
+              position: 'relative',
+              padding: '40px',
             }}
           >
-            {/* Top Text */}
+            {/* Top Hashtags */}
             <div
               style={{
                 display: 'flex',
-                fontSize: 60,
-                fontWeight: 900,
-                color: '#111111',
-                marginBottom: '10px',
-                letterSpacing: '-0.05em',
+                fontSize: 36,
+                color: '#555555',
+                fontWeight: 600,
+                marginBottom: '70px',
+                letterSpacing: '-0.02em',
               }}
             >
-              {top}
+              {topTags}
             </div>
 
-            {/* Mid Text */}
+            {/* Mid Huge Text (Green) */}
             <div
               style={{
                 display: 'flex',
-                fontSize: 180,
+                fontSize: mid.length > 5 ? 150 : 200,
                 fontWeight: 900,
-                color: '#FFFFFF',
-                lineHeight: 1.1,
-                letterSpacing: '-0.06em',
-                textShadow: '3px 4px 0px rgba(0,0,0,0.15)',
+                color: '#2b8f58', // 더 진하고 선명한 녹색
+                lineHeight: 1.05,
+                letterSpacing: '-0.05em',
+                marginBottom: '10px',
               }}
             >
               {mid}
             </div>
 
-            {/* Bottom Text */}
+            {/* Bottom Huge Text (Black) */}
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'relative',
-                marginTop: '10px'
+                fontSize: bottom.length > 5 ? 150 : 200,
+                fontWeight: 900,
+                color: '#111111',
+                lineHeight: 1.05,
+                letterSpacing: '-0.05em',
+                marginBottom: '80px',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  fontSize: 130,
-                  fontWeight: 900,
-                  color: '#FFFFFF',
-                  letterSpacing: '-0.05em',
-                  lineHeight: 1.1,
-                  zIndex: 2,
-                  textShadow: '3px 4px 0px rgba(0,0,0,0.15)',
-                }}
-              >
-                {bottom}
-              </div>
-              
-              {/* Underlines under the bottom text */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '5px',
-                  width: '105%',
-                  height: '24px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '12px',
-                  zIndex: 1,
-                  opacity: 0.9,
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '-20px',
-                  left: '10%',
-                  width: '80%',
-                  height: '10px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '5px',
-                  zIndex: 1,
-                  opacity: 0.9,
-                }}
-              />
+              {bottom}
             </div>
+
+            {/* Small decorative text at the bottom */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '60px',
+                display: 'flex',
+                fontSize: 24,
+                color: '#aaaaaa',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+              }}
+            >
+              @TREND_AUTO_GENERATOR
+            </div>
+            
+            {/* Decorative dots to emulate the floating emojis vibe (for broad topic safety) */}
+            <div style={{ position: 'absolute', display: 'flex', left: '100px', top: '380px', width: '40px', height: '40px', borderRadius: '20px', backgroundColor: '#fde047', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+            <div style={{ position: 'absolute', display: 'flex', right: '120px', bottom: '280px', width: '50px', height: '50px', borderRadius: '25px', backgroundColor: '#ef4444', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+            <div style={{ position: 'absolute', display: 'flex', right: '160px', top: '180px', width: '24px', height: '24px', borderRadius: '12px', backgroundColor: '#3b82f6', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
           </div>
         </div>
       ),
