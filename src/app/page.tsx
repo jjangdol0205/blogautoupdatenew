@@ -16,11 +16,6 @@ export default function Home() {
   
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  // Advanced AI Learning Features
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [goodUrl, setGoodUrl] = useState("");
-  const [badUrl, setBadUrl] = useState("");
-
   const [recommendations, setRecommendations] = useState<{keyword: string, monthlyTotalCnt: number}[]>([]);
   const [isRecommending, setIsRecommending] = useState(false);
   const [rcmdError, setRcmdError] = useState<string | null>(null);
@@ -63,7 +58,7 @@ export default function Home() {
       const res = await fetch('/api/agent-trend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goodUrl, badUrl }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (res.ok && data.trends) {
@@ -91,7 +86,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ keyword, deviceType, goodUrl, badUrl }),
+        body: JSON.stringify({ keyword, deviceType }),
       });
 
       const data = await response.json();
@@ -365,45 +360,6 @@ export default function Home() {
                     className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
                     required
                   />
-                </div>
-
-                {/* AI 맞춤 학습 피드백 기능 */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
-                  >
-                    <span>{isAdvancedOpen ? "▼" : "▶"}</span>
-                    <span>🤖 AI 블로그 맞춤 학습 (레퍼런스 주소 벤치마킹) <span className="text-xs font-normal text-blue-500 bg-blue-100 px-1.5 py-0.5 rounded ml-1">Beta</span></span>
-                  </button>
-                  
-                  {isAdvancedOpen && (
-                    <div className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-4 animate-fade-in shadow-inner">
-                      <div>
-                         <label className="block text-xs font-bold text-green-700 mb-1">👍 떡상한 내 블로그 주소 (성공 사례)</label>
-                         <input
-                           type="url"
-                           value={goodUrl}
-                           onChange={(e) => setGoodUrl(e.target.value)}
-                           placeholder="예: https://blog.naver.com/myblog/1234567"
-                           className="w-full px-3 py-2 border rounded text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
-                         />
-                         <p className="text-[11px] text-gray-500 mt-1">이 글의 장점(가독성, 정보량, 문체)을 철저히 분석해서 100% 흡수합니다.</p>
-                      </div>
-                      <div>
-                         <label className="block text-xs font-bold text-red-700 mb-1">👎 폭망한 내 블로그 주소 (실패 사례)</label>
-                         <input
-                           type="url"
-                           value={badUrl}
-                           onChange={(e) => setBadUrl(e.target.value)}
-                           placeholder="예: https://blog.naver.com/myblog/7654321"
-                           className="w-full px-3 py-2 border rounded text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none"
-                         />
-                         <p className="text-[11px] text-gray-500 mt-1">이 글의 단점(지루함, 구조적 문제)을 분석하고 절대로 따라하지 않습니다.</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 
