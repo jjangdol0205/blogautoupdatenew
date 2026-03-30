@@ -16,6 +16,16 @@ export default function Home() {
   
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
+  // Advanced AI Learning Features
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [goodUrl, setGoodUrl] = useState("");
+  const [badUrl, setBadUrl] = useState("");
+  
+  // MLB Targeting
+  const [mlbTargetTeam, setMlbTargetTeam] = useState("");
+  const [mlbRecommendations, setMlbRecommendations] = useState<any[]>([]);
+  const [isMlbRecommending, setIsMlbRecommending] = useState(false);
+  const [mlbRcmdError, setMlbRcmdError] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<{keyword: string, monthlyTotalCnt: number}[]>([]);
   const [isRecommending, setIsRecommending] = useState(false);
   const [rcmdError, setRcmdError] = useState<string | null>(null);
@@ -24,6 +34,29 @@ export default function Home() {
   const [aiTrends, setAiTrends] = useState<any[]>([]);
   const [isTrendLoading, setIsTrendLoading] = useState(false);
 
+  const fetchMlbRecommendations = async () => {
+    setIsMlbRecommending(true);
+    setMlbRcmdError(null);
+    setMlbRecommendations([]);
+    try {
+      const res = await fetch('/api/recommend-mlb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (res.ok && data.recommendations) {
+        setMlbRecommendations(data.recommendations);
+      } else {
+        throw new Error(data.error || 'MLB 추천 실패');
+      }
+    } catch (e: any) {
+      setMlbRcmdError(e.message);
+    } finally {
+      setIsMlbRecommending(false);
+    }
+  };
+    
   const handleRecommend = async (seedKeyword?: string) => {
     const targetKeyword = seedKeyword || keyword.trim();
     if (!targetKeyword) return;
@@ -207,6 +240,116 @@ export default function Home() {
       setIsGenerating(false);
     }
   };
+
+  const handleGenerateMlb = async (e?: React.MouseEvent | null, overrideTeam?: string) => {
+    if (e) e.preventDefault();
+    const currentTargetTeam = overrideTeam || mlbTargetTeam;
+    setMlbTargetTeam(currentTargetTeam);
+
+    setIsGenerating(true);
+    setResult(null);
+    setErrorMsg(null);
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+      const response = await fetch('/api/generate-mlb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceType, targetTeam: currentTargetTeam }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'MLB 생성 중 오류가 발생했습니다.');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("스트림을 읽을 수 없습니다.");
+
+      const decoder = new TextDecoder();
+      let aiText = "";
+      let metaData: any = null;
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        
+        let boundary = buffer.indexOf('\n\n');
+        while (boundary !== -1) {
+           const message = buffer.substring(0, boundary);
+           buffer = buffer.substring(boundary + 2);
+           
+           if (message.startsWith('data: ')) {
+               try {
+                   const data = JSON.parse(message.substring(6));
+                   if (data.type === 'meta') {
+                       metaData = data;
+                   } else if (data.type === 'text') {
+                       aiText += data.text;
+                       
+                       let currentTitle = "블로그 타이틀 작성 중...";
+                       const titleMatch = aiText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i);
+                       if (titleMatch) {
+                           currentTitle = titleMatch[1].trim();
+                       } else if (aiText.includes('[TITLE]')) {
+                           currentTitle = aiText.split(/\[TITLE\]/i)[1].trim(); 
+                       }
+
+                       let currentContent = aiText;
+                       if (aiText.includes('[CONTENT]')) {
+                           currentContent = aiText.split(/\[CONTENT\]/i)[1] || "";
+                       }
+                       currentContent = currentContent.replace(/\[\/CONTENT\]/i, '').trim();
+
+                       if (metaData) {
+                           if (currentContent.includes('[THUMBNAIL]')) {
+                               currentContent = currentContent.replace('[THUMBNAIL]', metaData.thumbnailHtml);
+                           } else if (metaData.thumbnailHtml) {
+                               currentContent = metaData.thumbnailHtml + '<br/>' + currentContent;
+                           }
+                       }
+                       
+                       setResult({ title: currentTitle, content: currentContent + '<span className="inline-block w-2 h-4 ml-1 bg-[#00c73c] animate-pulse"></span>' });
+                   }
+               } catch(e) { console.error("SSE parse error", e, message); }
+           }
+           boundary = buffer.indexOf('\n\n');
+        }
+      }
+
+      let finalContent = aiText;
+      if (finalContent.includes('[CONTENT]')) finalContent = finalContent.split(/\[CONTENT\]/i)[1] || "";
+      finalContent = finalContent.replace(/\[\/CONTENT\]/i, '').trim();
+      
+      if (metaData) {
+          if (finalContent.includes('[THUMBNAIL]')) {
+              finalContent = finalContent.replace('[THUMBNAIL]', metaData.thumbnailHtml);
+          } else {
+              finalContent = metaData.thumbnailHtml + '<br/>' + finalContent;
+          }
+      }
+      
+      const finalTitle = aiText.match(/\[TITLE\]([\s\S]*?)\[\/TITLE\]/i)?.[1]?.trim() || "제목 완성";
+      setResult({ title: finalTitle, content: finalContent });
+
+    } catch (error: unknown) {
+      console.error(error);
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') return;
+        setErrorMsg(error.message);
+      } else {
+        setErrorMsg('알 수 없는 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
 
   const copyToClipboard = async (text: string, field: string, isHtml: boolean = false) => {
     try {
@@ -438,6 +581,87 @@ export default function Home() {
                           >
                             <PenTool className="w-4 h-4" /> 이 키워드로 즉시 자동 생성
                           </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* MLB 전용 머신 */}
+                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3 p-5 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-sm border border-blue-200">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-sm text-blue-900 font-bold flex items-center gap-2">
+                      <span className="text-lg">⚾</span> 단일 경기 집중 스포트라이트 머신 (기자 모드)
+                    </p>
+                    <span className="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">NEW</span>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={fetchMlbRecommendations}
+                    disabled={isMlbRecommending || isGenerating}
+                    className="w-full py-3 bg-blue-800 hover:bg-blue-900 text-white font-extrabold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 animate-pulse hover:animate-none"
+                  >
+                    {isMlbRecommending ? <><Loader2 className="w-4 h-4 animate-spin" /> 오늘치 경기 데이터 분석 중...</> : <><Sparkles className="w-4 h-4 text-yellow-300" /> 🤖 AI 자율주행 모드 (오늘 가장 핫한 경기 자동 추천)</>}
+                  </button>
+
+                  <div className="flex items-center gap-2 mt-4 mb-2">
+                     <span className="h-px bg-blue-200 flex-1"></span>
+                     <span className="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full border border-blue-200">또는 직접 팀 검색해서 쓰기</span>
+                     <span className="h-px bg-blue-200 flex-1"></span>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={mlbTargetTeam}
+                    onChange={(e) => setMlbTargetTeam(e.target.value)}
+                    placeholder="관심 팀 (예: 다저스, 양키스, 김하성 등)"
+                    className="w-full px-4 py-3 rounded-lg border border-blue-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-inner bg-white"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={(e) => handleGenerateMlb(e, mlbTargetTeam)}
+                    disabled={isGenerating || !mlbTargetTeam.trim()}
+                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-extrabold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 mt-1"
+                  >
+                    <PenTool className="w-4 h-4" /> 입력한 경기 심층 기자 칼럼 자동 생성
+                  </button>
+                </div>
+
+                {/* MLB 추천 결과 리스트 */}
+                {mlbRcmdError && (
+                  <p className="text-xs text-red-500 mt-2 text-center bg-red-50 p-2 rounded">{mlbRcmdError}</p>
+                )}
+                {mlbRecommendations.length > 0 && !isMlbRecommending && (
+                  <div className="mt-3 bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm animate-fade-in">
+                    <h3 className="text-sm font-extrabold text-blue-950 mb-3 flex items-center gap-2">
+                       <span className="bg-yellow-400 text-blue-900 text-xs px-2 py-1 rounded-md font-bold">✨ AI Picks</span>
+                       오늘의 메이저리그 핫이슈 TOP {mlbRecommendations.length}
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      {mlbRecommendations.map((rec, i) => (
+                        <div 
+                          key={i}
+                          className="p-4 bg-white border border-blue-100 rounded-xl shadow-sm hover:shadow-md transition-shadow group flex flex-col gap-2"
+                        >
+                          <div className="flex justify-between items-start">
+                            <span className="font-bold text-blue-900 text-base group-hover:text-blue-600 leading-tight">
+                              {rec.title}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-700 bg-gray-50 border border-gray-100 p-2.5 rounded-lg leading-snug">
+                            {rec.reason}
+                          </p>
+                          <div className="flex justify-end gap-2 mt-1">
+                             <button
+                               type="button"
+                               onClick={(e) => handleGenerateMlb(e, rec.targetTeam)}
+                               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm text-xs"
+                             >
+                               <PenTool className="w-3.5 h-3.5" /> 📝 이 매치업으로 심층 칼럼 작성
+                             </button>
+                          </div>
                         </div>
                       ))}
                     </div>
