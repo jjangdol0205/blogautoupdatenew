@@ -9,6 +9,30 @@ export async function GET(request: Request) {
     const mid = searchParams.get('mid') || '블로그';
     const bottom = searchParams.get('bottom') || '챌린지';
     const bgUrl = searchParams.get('bg');
+    const style = searchParams.get('style') || 'blog1';
+
+    let bgGradient = 'linear-gradient(to bottom right, #7C3AED, #0EA5E9)'; // blog1 (Purple/Blue)
+    let glowOrb1 = '#F472B6';
+    let glowOrb2 = '#34D399';
+    let badgeColor = '#4F46E5';
+    let badgeBg = 'rgba(79, 70, 229, 0.08)';
+    let bottomTextColor = '#2563EB';
+
+    if (style === 'blog2') {
+      bgGradient = 'linear-gradient(to bottom right, #059669, #0284C7)'; // Emerald/Blue
+      glowOrb1 = '#34D399';
+      glowOrb2 = '#FBBF24';
+      badgeColor = '#059669';
+      badgeBg = 'rgba(5, 150, 105, 0.08)';
+      bottomTextColor = '#0ea5e9';
+    } else if (style === 'blog3') {
+      bgGradient = 'linear-gradient(to right, #f87171, #f97316)'; // Red/Orange
+      glowOrb1 = '#fcd34d';
+      glowOrb2 = '#f43f5e';
+      badgeColor = '#e11d48';
+      badgeBg = 'rgba(225, 29, 72, 0.08)';
+      bottomTextColor = '#ea580c';
+    }
 
     // 해시태그 형식으로 변환 (앞에 #이 없으면 단어별로 # 추가)
     const topTags = top.includes('#') ? top : `#${top.split(' ').filter(t => t.trim() !== '').join(' #')}`;
@@ -33,7 +57,7 @@ export async function GET(request: Request) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundImage: bgUrl ? 'none' : 'linear-gradient(to bottom right, #7C3AED, #0EA5E9)', // 진한 보라색 -> 맑은 스카이블루 (영롱한 오로라 그라데이션)
+            backgroundImage: bgUrl ? 'none' : bgGradient,
             backgroundColor: bgUrl ? '#000' : 'transparent',
             fontFamily: 'sans-serif',
             position: 'relative',
@@ -62,8 +86,8 @@ export async function GET(request: Request) {
           )}
 
           {/* Glowing Orbs behind the Glass Card */}
-          <div style={{ position: 'absolute', top: '100px', left: '150px', width: '300px', height: '300px', borderRadius: '150px', backgroundColor: '#F472B6', opacity: 0.8, filter: 'blur(50px)' }} />
-          <div style={{ position: 'absolute', bottom: '100px', right: '150px', width: '350px', height: '350px', borderRadius: '175px', backgroundColor: '#34D399', opacity: 0.6, filter: 'blur(60px)' }} />
+          <div style={{ position: 'absolute', top: '100px', left: '150px', width: '300px', height: '300px', borderRadius: '150px', backgroundColor: glowOrb1, opacity: 0.8, filter: 'blur(50px)' }} />
+          <div style={{ position: 'absolute', bottom: '100px', right: '150px', width: '350px', height: '350px', borderRadius: '175px', backgroundColor: glowOrb2, opacity: 0.6, filter: 'blur(60px)' }} />
 
           {/* Inner Premium Glassmorphism Box */}
           <div
@@ -87,8 +111,8 @@ export async function GET(request: Request) {
               style={{
                 display: 'flex',
                 fontSize: 34,
-                color: '#4F46E5', // 깊은 인디고 색상
-                backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                color: badgeColor,
+                backgroundColor: badgeBg,
                 padding: '12px 30px',
                 borderRadius: '30px',
                 fontWeight: 700,
@@ -119,7 +143,7 @@ export async function GET(request: Request) {
               {mid}
             </div>
 
-            {/* Bottom Huge Text (Electric Blue) */}
+            {/* Bottom Huge Text */}
             <div
               style={{
                 display: 'flex',
@@ -129,7 +153,7 @@ export async function GET(request: Request) {
                 wordBreak: 'keep-all',
                 fontSize: bottomSize,
                 fontWeight: 900,
-                color: '#2563EB', // 세련되고 눈에 띄는 블루
+                color: bottomTextColor,
                 lineHeight: 1.15,
                 letterSpacing: '-0.05em',
                 marginBottom: '80px',

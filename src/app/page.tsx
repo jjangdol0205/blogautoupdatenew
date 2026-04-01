@@ -15,17 +15,10 @@ export default function Home() {
   
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  // 1) 일반 트렌드
+  // 통합 트렌드 (일반 + 경제)
   const [aiTrends, setAiTrends] = useState<any[]>([]);
   const [isTrendLoading, setIsTrendLoading] = useState(false);
-
-  // 2) 스포츠 트렌드
-  const [sportsTrends, setSportsTrends] = useState<any[]>([]);
-  const [isSportsLoading, setIsSportsLoading] = useState(false);
-
-  // 3) 경제 트렌드
-  const [financeTrends, setFinanceTrends] = useState<any[]>([]);
-  const [isFinanceLoading, setIsFinanceLoading] = useState(false);
+  const [activeBlogStyle, setActiveBlogStyle] = useState('blog1');
 
   const LOCAL_STORAGE_KEY = 'autoblog_keyword_history';
 
@@ -53,10 +46,10 @@ export default function Home() {
     } catch (e) {}
   };
 
-  const fetchAiTrendMiner = async () => {
+  const fetchAiTrendMiner = async (style: string) => {
+    setActiveBlogStyle(style);
     setIsTrendLoading(true);
-    setSportsTrends([]);
-    setFinanceTrends([]);
+    setResult(null);
     try {
       const bannedKeywords = getBannedKeywords();
       const res = await fetch('/api/agent-trend', {
@@ -75,56 +68,6 @@ export default function Home() {
       alert('네트워크 오류가 발생했습니다.');
     } finally {
       setIsTrendLoading(false);
-    }
-  };
-
-  const fetchSportsTrendMiner = async () => {
-    setIsSportsLoading(true);
-    setAiTrends([]);
-    setFinanceTrends([]);
-    try {
-      const bannedKeywords = getBannedKeywords();
-      const res = await fetch('/api/agent-sports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bannedKeywords }),
-      });
-      const data = await res.json();
-      if (res.ok && data.trends) {
-        setSportsTrends(data.trends);
-        saveKeywordHistory(data.trends.map((t: any) => t.keyword));
-      } else {
-        alert(data.error || '스포츠 이슈 발굴 실패');
-      }
-    } catch (e: any) {
-      alert('네트워크 오류');
-    } finally {
-      setIsSportsLoading(false);
-    }
-  };
-
-  const fetchFinanceTrendMiner = async () => {
-    setIsFinanceLoading(true);
-    setAiTrends([]);
-    setSportsTrends([]);
-    try {
-      const bannedKeywords = getBannedKeywords();
-      const res = await fetch('/api/agent-finance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bannedKeywords }),
-      });
-      const data = await res.json();
-      if (res.ok && data.trends) {
-        setFinanceTrends(data.trends);
-        saveKeywordHistory(data.trends.map((t: any) => t.keyword));
-      } else {
-        alert(data.error || '경제/국제 뉴스 발굴 실패');
-      }
-    } catch (e) {
-      alert('네트워크 오류');
-    } finally {
-      setIsFinanceLoading(false);
     }
   };
 
@@ -362,7 +305,7 @@ export default function Home() {
     );
   };
 
-  const isAnyLoading = isTrendLoading || isSportsLoading || isFinanceLoading || isGenerating;
+  const isAnyLoading = isTrendLoading || isGenerating;
 
   return (
     <div className="min-h-screen pb-20">
@@ -394,51 +337,49 @@ export default function Home() {
             <form onSubmit={handleGenerate} className="space-y-6">
               <div className="space-y-4">
                 
-                {/* 3 AI Modes */}
+                {/* 3 Blog Modes */}
                 <div className="flex flex-col gap-3">
                   <button
                     type="button"
-                    onClick={fetchAiTrendMiner}
+                    onClick={() => fetchAiTrendMiner('blog1')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 hover:border-purple-400 text-purple-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 hover:border-purple-400 text-purple-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                      {isTrendLoading ? <Loader2 className="w-5 h-5 animate-spin text-purple-600" /> : <Sparkles className="w-5 h-5 text-purple-600" />}
-                      <span className="text-base">1. 일반 AI 자율주행 모드</span>
+                      {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-5 h-5 animate-spin text-purple-600" /> : <Sparkles className="w-5 h-5 text-purple-600" />}
+                      <span className="text-base">1. 첫번째 블로그 추출 (보라/블루 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-purple-700 ml-7">실시간 핫이슈 & 검색량 기반의 정책/생활/정보 틈새 키워드 무작위 추출</span>
+                    <span className="text-xs font-normal text-purple-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={fetchSportsTrendMiner}
+                    onClick={() => fetchAiTrendMiner('blog2')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 hover:border-blue-400 text-blue-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 hover:border-emerald-400 text-emerald-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                      {isSportsLoading ? <Loader2 className="w-5 h-5 animate-spin text-blue-600" /> : <span className="text-lg">⚾</span>}
-                      <span className="text-base">2. 스포츠 AI 자율주행 모드</span>
+                      {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <Sparkles className="w-5 h-5 text-emerald-600" />}
+                      <span className="text-base">2. 두번째 블로그 추출 (그린/에메랄드 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-blue-700 ml-7">손흥민, 이정후, 양현종, 르브론 등 종목불문 가장 뜨거운 스포츠 스타 매치업 집중 추천</span>
+                    <span className="text-xs font-normal text-emerald-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={fetchFinanceTrendMiner}
+                    onClick={() => fetchAiTrendMiner('blog3')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 hover:border-emerald-400 text-emerald-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 hover:border-orange-400 text-orange-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                      {isFinanceLoading ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <DollarSign className="w-5 h-5 text-emerald-600" />}
-                      <span className="text-base">3. 경제 AI 자율주행 모드</span>
+                      {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-orange-600" /> : <Sparkles className="w-5 h-5 text-orange-600" />}
+                      <span className="text-base">3. 세번째 블로그 추출 (오렌지/레드 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-emerald-700 ml-7">월스트리트저널, 블룸버그 실시간 국제/금융 이슈를 심층 조명할 수 있는 키워드 추천</span>
+                    <span className="text-xs font-normal text-orange-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
                   </button>
                 </div>
 
-                {renderTrendBlock(aiTrends, "일반 라이프/트렌드 TOP 3", <Sparkles className="w-3 h-3"/>, 'purple', 'general')}
-                {renderTrendBlock(sportsTrends, "최신 스포츠 매치업 TOP 3", "⚾", 'blue', 'sports')}
-                {renderTrendBlock(financeTrends, "핵심 경제/국제 이슈 TOP 3", <TrendingUp className="w-3 h-3"/>, 'emerald', 'finance')}
+                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeBlogStyle === 'blog1' ? 'purple' : activeBlogStyle === 'blog2' ? 'emerald' : 'blue', activeBlogStyle)}
 
                 <div className="flex items-center gap-3 my-6">
                   <div className="h-px bg-gray-200 flex-1"></div>
@@ -472,6 +413,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={isAnyLoading || !keyword.trim()}
+                onClick={(e) => handleGenerate(null, keyword, activeBlogStyle)}
                 className="w-full btn btn-primary py-4 text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
@@ -482,7 +424,7 @@ export default function Home() {
                 ) : (
                   <>
                     <PenTool className="w-5 h-5" />
-                    입력된 키워드로 포스팅 생성
+                    입력된 키워드로 포스팅 생성 ({activeBlogStyle === 'blog1' ? '첫번째 블로그' : activeBlogStyle === 'blog2' ? '두번째 블로그' : '세번째 블로그'} 썸네일)
                   </>
                 )}
               </button>

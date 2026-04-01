@@ -130,6 +130,10 @@ def generate_blog_post(title, summary, link, persona):
    - 대주제: <h2 style='font-size: 24px; font-weight: 800; color: #111; margin-top: 70px; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #111;'>...</h2>
    - 소주제: <h3 style='font-size: 20px; font-weight: 700; color: #333; margin-top: 60px; margin-bottom: 20px; padding-left: 14px; border-left: 4px solid #00c73c;'>...</h3>
    - HTML 속성에는 쌍따옴표(") 대신 홑따옴표(') 사용.
+4. [🚨 할루시네이션(거짓정보) 방지 규칙 🚨]
+   - 제공된 '입력 정보(요약 및 링크)'에 기반해서만 작성하세요. 입력 정보에 없는 구체적인 예산, 지급일, 정확한 금리 등을 AI 마음대로 지어내서 적으면(할루시네이션) 블로그가 영구 정지됩니다. 모르는 수치는 "공식 홈페이지 참조" 등으로 안내하세요.
+5. 글의 맨 마지막(결론 및 해시태그 바로 위)에는 반드시 아래의 '면책 조항'을 추가하여 블로그의 법적 안전을 확보하세요.
+   <br><br><p style='font-size: 13px; color: #888; text-align: center; line-height: 1.5;'>🚨 <b>[팩트체크/면책조항]</b><br>본 포스팅은 보도자료를 바탕으로 작성되었으며, 정책 변경이나 예산 소진 등에 따라 실제 내용이 다를 수 있습니다. 반드시 공식 기관의 안내를 최종 확인하시기 바랍니다.</p>
 
 [출력 형식 제한]
 반드시 아래 특수 구분자를 사용하세요.
