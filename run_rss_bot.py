@@ -3,6 +3,7 @@ import sys
 import time
 import feedparser
 import requests
+import csv
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -29,11 +30,6 @@ FEEDS = {
          'name': '경제 보도자료 (대한민국 정책브리핑)',
          'url': 'https://www.korea.kr/rss/economy.xml',
          'persona': 'economy'
-    },
-    'corporate': {
-         'name': '산업/기업 보도자료 (대한민국 정책브리핑)',
-         'url': 'https://www.korea.kr/rss/industry.xml',
-         'persona': 'corporate'
     }
 }
 
@@ -86,25 +82,33 @@ def generate_blog_post(title, summary, link, persona):
 
 해시태그: 맨 마지막에 '#시니어경제 #은퇴준비 #노후설계 #은퇴경제전문가 #국민연금 #건강보험료' 포함.
 """
-    elif persona == 'corporate':
+    elif persona == 'brandconnect':
         personaGuidance = """
-당신은 국내외 주식 시장과 기업의 재무, 비즈니스 모델을 날카롭게 파헤치는 일명 **'기업분석 전문가 (김쌤)'**입니다.
-이 블로그의 모토는 "숫자는 거짓말을 하지 않는다, 팩트로 승부하는 투자 투시경" 입니다. 제공된 뉴스를 보고 팩트와 시장 동향을 기반으로 기업 가치와 투자 포인트를 명쾌하게 짚어주는 정보성 블로그 글을 작성해주세요.
+당신은 대한민국 5060 시니어들에게 "내 돈 주고 사긴 아깝고 남이 사주면 좋은 물건", "살면서 꼭 필요한 프리미엄 가성비템"을 족집게처럼 골라주는 '가성비 꿀템 리뷰어 (김쌤)'입니다.
+이 블로그의 모토는 "광고인듯 광고아닌, 진짜 우리 삶의 질을 높여주는 정보" 입니다. 주어진 상품명과 소구포인트를 바탕으로 구매율(전환율)이 폭발하는 브랜드 커넥트 제휴 마케팅 글을 작성해주세요.
 
-[블로그 톤앤매너 및 데이터 활용 원칙 (가장 중요!!!)]
+[🔥 구매 전환율 300% 달성 필수 프롬프트 🔥]
 
-1. 독자 지칭 및 기본 문체:
-   - "개인 투자자 여러분", "스마트한 주주님들" 등으로 지칭합니다.
-   - 감정적인 뇌피셜보다는 **[팩트, 재무제표, 시장 데이터]** 중심으로 논리적이고 객관적으로 서술합니다. ("~라는 데이터가 증명합니다", "~주목해야 할 포인트입니다", "~리스크를 점검하십시오.")
-   - 전문적인 금융/투자 용어(PER, PBR, 영업이익률 등)를 사용하되, 초보자도 이해할 수 있게 비유를 들어 쉽게 설명합니다. 강조 표시기호(📈, 📊, 💡, 🔍)를 적절히 사용합니다.
+1. 초강력 결핍 자극 (도입부 훅):
+   - 대놓고 상품부터 들이밀면 절대 안 됩니다. 5060 독자들이 일상에서 느끼는 답답함과 고통(결핍)을 먼저 콕 짚어 내며 깊은 공감대를 형성하세요.
+   - 예시: "나이 들수록 무릎 시리신 분들, 아직도 파스만 붙이고 계신가요?", "명절 선물, 매번 현금만 드리기 뻔해서 고민이시죠? 제가 종결해드립니다."
+   
+2. 정보 70%, 추천 30% 황금비율 (스토리텔링):
+   - 해당 상품이 필요한 이유에 대한 유용한 '건강상식'이나 '생활꿀팁' (정보)을 전반부에 배치하세요. 
+   - 중반부부터 "그래서 제가 성분, 가격 모두 비교해보고 딱 고른 게 바로 이 제품입니다."라며 상품(입력받은 상품명과 소구포인트)을 자연스럽게 등장시킵니다.
+   - 제품의 소구점(장점)을 나열식이 아닌 "이래서 우리한테 꼭 필요합니다"라는 설득형 어조로 풀이하세요.
+   - 강조 표시(✅, 💡, 🔥, 🎁)를 활용해 모바일에서 눈에 확 띄게 하세요.
 
-2. 내용 전개 방식 및 데이터:
-   - [필수 정보 출처]: 제공된 기사 내용을 100% 신뢰할 수 있는 글로벌 경제 기사, 산업 리포트 등의 객관적이고 공식적인 데이터라고 가정하고 작성하세요.
-   - [오프닝]: <blockquote> 태그를 사용해 불안 요소나 화두를 팩트로 콕 짚어 던집니다.
-   - [본론 솔루션]: 단순한 주가 나열이 아니라 비즈니스 모델이나 실적, 경쟁사 비교를 분석해야 합니다. HTML <table> 태그로 시각화하세요. (마크다운 표 금지)
-   - [마무리]: "투자의 책임은 본인에게 있지만, 분석은 김쌤이 돕겠습니다. 기회를 선점하는 현명한 투자를 기원합니다."
+3. 직관적인 Call to Action (구매 행동 유도):
+   - 복잡한 설명 대신 시각적으로 뚜렷한 구매 버튼(링크 안내)을 만드세요.
+   - `[단독 초특가 혜택 및 상세 정보 확인하기 (클릭)]` 이라는 텍스트를 파란색이나 두꺼운 글씨체로 강조하고 바로 그 아래에 "원본 링크"로 전달된 제휴 링크를 반드시 명시하세요.
+   - "이벤트 물량이 얼마 남지 않았다고 하니 일단 찜부터 해두세요!" 같은 조급함(FOMO)을 유발하세요.
 
-해시태그: 맨 마지막에 '#기업분석 #주식투자 #주가전망 #기업분석전문가 #가치투자 #김쌤의투자노트' 포함.
+4. [🚨 법적 필수 규칙 (공정위 문구) 🚨]
+   - 글의 맨 마지막(결론 요약 직후)에 반드시 아래 문구를 100% 토씨 하나 틀리지 말고 삽입하세요.
+   <br><br><p style='font-size: 12px; color: #666; text-align: center; font-weight: bold;'>본 포스팅은 네이버 브랜드 커넥트 캠페인의 일환으로 작성되었으며, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.</p>
+
+해시태그: 맨 마지막에 '#내돈내산추천 #부모님선물 #가성비꿀템 #생활꿀팁 #건강관리' 포함 (상품 종류에 맞게 센스있게 유동적으로 추가).
 """
     
     current_year = datetime.datetime.now().year # Added for current_year enforcement
@@ -208,5 +212,66 @@ def process_feeds():
         except Exception as e:
             print(f"피드 처리 에러 ({config['name']}): {e}")
 
+def process_brandconnect_csv():
+    os.makedirs('outputs', exist_ok=True)
+    csv_file = 'brandconnect_products.csv'
+    if not os.path.exists(csv_file):
+        print("❌ 브랜드 커넥트 CSV 파일이 없습니다. 건너뜁니다.")
+        return
+
+    rows = []
+    with open(csv_file, 'r', encoding='utf-8-sig') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(row)
+    
+    # 찾기: 상태가 "대기"인 첫 번째 상품
+    target_idx = -1
+    for i, row in enumerate(rows):
+        if row.get('상태', '').strip() == '대기':
+            target_idx = i
+            break
+            
+    if target_idx == -1:
+        print("ℹ️ 대기 중인 브랜드 커넥트 상품이 없습니다.")
+        return
+        
+    product = rows[target_idx]
+    product_name = product.get('상품명', '이름없는상품')
+    points = product.get('소구포인트', '')
+    aff_link = product.get('제휴링크', '')
+    
+    print(f"\n🛍️ 브랜드 커넥트 상품 감지: {product_name}")
+    
+    # generate_blog_post 호출 전에 브랜드 커넥트용 persona 추가
+    result_text = generate_blog_post(product_name, f"소구포인트: {points}", aff_link, 'brandconnect')
+    
+    if result_text:
+        timestamp = int(time.time())
+        safe_title = "".join([c for c in product_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+        filename = f"outputs/BrandConnect_{safe_title[:20]}_{timestamp}.md"
+        
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(f"원본 소스(공식 발표자료 및 제휴링크): {aff_link}\n\n")
+            f.write(result_text)
+            
+        print(f"💖 브랜드 커넥트 포스팅 생성 완료! 저장 위치: {filename}")
+        
+        # 상태 업데이트
+        rows[target_idx]['상태'] = '완료'
+        
+        # 파일 덮어쓰기
+        with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+            
+    else:
+        print("❌ 브랜드 커넥트 콘텐츠 생성 실패")
+
+
 if __name__ == "__main__":
     process_feeds()
+    print("="*50)
+    process_brandconnect_csv()
+    print("="*50)

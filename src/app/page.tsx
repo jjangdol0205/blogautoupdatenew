@@ -5,6 +5,9 @@ import { Sparkles, Copy, CheckCircle2, PenTool, Loader2, AlertCircle, Lightbulb,
 
 export default function Home() {
   const [keyword, setKeyword] = useState("");
+  const [bcTitle, setBcTitle] = useState("");
+  const [bcPoints, setBcPoints] = useState("");
+  const [bcLink, setBcLink] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
@@ -73,10 +76,20 @@ export default function Home() {
 
   const handleGenerate = async (e?: React.FormEvent | null, overrideKeyword?: string, category: string = 'general') => {
     if (e) e.preventDefault();
-    const currentKeyword = overrideKeyword || keyword;
-    if (!currentKeyword.trim()) return;
+    
+    let currentKeyword = overrideKeyword || keyword;
+    
+    if (category === 'brandconnect') {
+      if (!bcTitle.trim() || !bcLink.trim()) {
+        setErrorMsg("네이버 브랜드 커넥트: 상품명과 제휴 링크를 반드시 입력해주세요.");
+        return;
+      }
+      currentKeyword = `상품명: ${bcTitle}\n소구포인트: ${bcPoints}\n제휴링크: ${bcLink}`;
+    } else {
+      if (!currentKeyword.trim()) return;
+    }
 
-    if (overrideKeyword) {
+    if (overrideKeyword && category !== 'brandconnect') {
       setKeyword(overrideKeyword);
     }
 
@@ -359,7 +372,7 @@ export default function Home() {
                     className="w-full px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 hover:border-emerald-400 text-emerald-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                      {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <Sparkles className="w-5 h-5 text-emerald-600" />}
+                       {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <Sparkles className="w-5 h-5 text-emerald-600" />}
                       <span className="text-base">2. 두번째 블로그 추출 (그린/에메랄드 썸네일)</span>
                     </div>
                     <span className="text-xs font-normal text-emerald-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
@@ -367,24 +380,79 @@ export default function Home() {
 
                   <button
                     type="button"
-                    onClick={() => fetchAiTrendMiner('blog3')}
+                    onClick={() => { setActiveBlogStyle('brandconnect'); setAiTrends([]); setResult(null); setErrorMsg(null); }}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 hover:border-orange-400 text-orange-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className={`w-full px-5 py-4 bg-gradient-to-r ${activeBlogStyle === 'brandconnect' ? 'from-orange-100 to-red-100 py-5 border-orange-500 border-2' : 'from-orange-50 to-red-50 border-orange-200 hover:border-orange-400'} text-orange-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1`}
                   >
                     <div className="flex items-center gap-2">
-                      {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-orange-600" /> : <Sparkles className="w-5 h-5 text-orange-600" />}
-                      <span className="text-base">3. 세번째 블로그 추출 (오렌지/레드 썸네일)</span>
+                       <DollarSign className="w-5 h-5 text-orange-600" />
+                      <span className="text-base">3. 🛍️ 브랜드 커넥트 전용봇 (수익화)</span>
                     </div>
-                    <span className="text-xs font-normal text-orange-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
+                    <span className="text-xs font-normal text-orange-700 ml-7">스마트폰으로 링크만 복붙하면 영업글+썸네일 자동 생성</span>
                   </button>
                 </div>
 
-                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeBlogStyle === 'blog1' ? 'purple' : activeBlogStyle === 'blog2' ? 'emerald' : 'blue', activeBlogStyle)}
+                {activeBlogStyle !== 'brandconnect' ? (
+                  <>
+                    {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeBlogStyle === 'blog1' ? 'purple' : activeBlogStyle === 'blog2' ? 'emerald' : 'blue', activeBlogStyle)}
 
-                <div className="flex items-center gap-3 my-6">
-                  <div className="h-px bg-gray-200 flex-1"></div>
-                  <span className="text-sm font-semibold text-gray-500">또는</span>
-                  <div className="h-px bg-gray-200 flex-1"></div>
+                    <div className="flex items-center gap-3 my-6">
+                      <div className="h-px bg-gray-200 flex-1"></div>
+                      <span className="text-sm font-semibold text-gray-500">또는</span>
+                      <div className="h-px bg-gray-200 flex-1"></div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="keyword" className="block text-sm font-semibold">
+                        직접 작성할 키워드 입력 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="keyword"
+                        type="text"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        placeholder="직접 작성하고 싶은 특정 키워드가 있다면 입력하세요."
+                        className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-6 bg-orange-50 p-6 rounded-2xl border border-orange-200 shadow-sm animate-fade-in space-y-4">
+                    <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+                      💸 네이버 브랜드 커넥트 필수 정보 입력
+                    </h3>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-orange-900">상품명 <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        value={bcTitle}
+                        onChange={(e) => setBcTitle(e.target.value)}
+                        placeholder="예: 코지마 목어깨 안마기"
+                        className="w-full px-4 py-3 rounded-md border border-orange-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-orange-900">소구포인트 (옵션)</label>
+                      <input
+                        type="text"
+                        value={bcPoints}
+                        onChange={(e) => setBcPoints(e.target.value)}
+                        placeholder="예: 부모님 명절선물 강력추천, 1+1 행사"
+                        className="w-full px-4 py-3 rounded-md border border-orange-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-orange-900">제휴 링크 <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        value={bcLink}
+                        onChange={(e) => setBcLink(e.target.value)}
+                        placeholder="스마트폰 화면에서 브랜드 커넥트 제휴 링크를 복사해 붙여넣으세요"
+                        className="w-full px-4 py-3 rounded-md border border-orange-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                )}/div>
                 </div>
 
                 <div className="space-y-2">
@@ -412,8 +480,8 @@ export default function Home() {
 
               <button
                 type="submit"
-                disabled={isAnyLoading || !keyword.trim()}
-                onClick={(e) => handleGenerate(null, keyword, activeBlogStyle)}
+                disabled={isAnyLoading}
+                onClick={(e) => handleGenerate(e, undefined, activeBlogStyle)}
                 className="w-full btn btn-primary py-4 text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
@@ -424,7 +492,7 @@ export default function Home() {
                 ) : (
                   <>
                     <PenTool className="w-5 h-5" />
-                    입력된 키워드로 포스팅 생성 ({activeBlogStyle === 'blog1' ? '첫번째 블로그' : activeBlogStyle === 'blog2' ? '두번째 블로그' : '세번째 블로그'} 썸네일)
+                    {activeBlogStyle === 'brandconnect' ? '입력된 정보로 제휴 마케팅 글 생성' : `입력된 키워드로 포스팅 생성 (${activeBlogStyle === 'blog1' ? '첫번째 블로그' : '두번째 블로그'} 썸네일)`}
                   </>
                 )}
               </button>
