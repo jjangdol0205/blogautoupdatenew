@@ -105,14 +105,47 @@ ${feedbackLearningGuidance}
 `;
     }
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        temperature: 0.8,
-        tools: [{ googleSearch: {} }]
-      },
-    });
+    let response;
+    let retries = 3;
+    let currentModel = "gemini-2.5-flash";
+
+    while (retries > 0) {
+      try {
+        response = await ai.models.generateContent({
+          model: currentModel,
+          contents: prompt,
+          config: {
+            systemInstruction: "당신은 트렌드를 분석하는 AI입니다. 구글 검색 과정이나 원본 검색 데이터({'title': ...} 형태)를 절대 출력하지 마세요. 오직 사용자가 요청한 JSON 형식 문서만 출력해야 합니다.",
+            temperature: 0.8,
+            tools: [{ googleSearch: {} }]
+          },
+        });
+        break; // 성공 시 루프 탈출
+      } catch (err: any) {
+        retries--;
+        const is503 = err?.status === 503 || err?.message?.includes('503') || err?.message?.includes('high demand') || err?.message?.includes('UNAVAILABLE');
+        const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');
+        
+        if ((is503 || is429) && retries > 0) {
+          // Flash 모델이 503 폭주 에러를 뱉을 경우, 결제 유저(Tier 1)의 이점을 살려 Pro 모델로 즉각 우회
+          if (currentModel === "gemini-2.5-flash") {
+             console.log("[Agent-Trend] 503/429 Error on Flash. Switching to gemini-2.5-pro...");
+             currentModel = "gemini-2.5-pro";
+          } else {
+             const waitTime = (3 - retries) * 2000;
+             console.log(`[Agent-Trend] Error on Pro. Retrying in ${waitTime}ms... (${retries} attempts left)`);
+             await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        } else {
+          // 모두 실패했을 경우에만 프론트엔드로 에러 메시지(503 안내문) 전달
+          throw new Error(is503 ? '현재 구글 AI 서버에 트래픽이 폭주하여 지연되고 있습니다. 잠시 후 다시 버튼을 눌러주세요.' : (err?.message || '알 수 없는 오류'));
+        }
+      }
+    }
+
+    if (!response) {
+      throw new Error('AI 응답을 받지 못했습니다.');
+    }
 
     let trends = [];
     try {
