@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const ai = new GoogleGenAI({});
 
-export const maxDuration = 60; // Vercel 서버리스 함수 타임아웃 최대 연장
+export const maxDuration = 300; // Vercel Pro 서버리스 함수 타임아웃 300초로 연장
 
 export async function POST(req: Request) {
   try {
@@ -368,9 +368,9 @@ ${deviceType === 'mobile' ? "(생성된 블로그 본문을 <p>, <br>, <b> 태�
         const is429 = generateErr?.status === 429 || generateErr.message?.includes('429') || generateErr.message?.includes('quota');
         
         if ((is503 || is429) && genAttempt < generateModels.length) {
-          console.warn(`[Generate] 503/429 on ${generateModels[genAttempt-1]}. Waiting 2.5s before falling back to ${generateModels[genAttempt]}...`);
-          // 너무 빨리 던지면 구글 WAF가 전부 503을 줄 수 있으므로 2.5초 숨고르기
-          await new Promise(resolve => setTimeout(resolve, 2500));
+          const waitMs = is429 ? 10000 : 3000; // 429 쿼터 초과는 10초 대기, 503은 3초 대기
+          console.warn(`[Generate] 503/429 on ${generateModels[genAttempt-1]}. Waiting ${waitMs}ms before falling back to ${generateModels[genAttempt]}...`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
           continue; 
         } else {
           throw generateErr;

@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 const ai = new GoogleGenAI({});
 
-export const maxDuration = 60; // Vercel 서버리스 함수 타임아웃 최대 연장
+export const maxDuration = 300; // Vercel Pro 서버리스 함수 타임아웃 300초로 연장
 
 export async function POST(req: Request) {
   try {
@@ -135,8 +135,9 @@ ${feedbackLearningGuidance}
         const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');
         
         if ((is503 || is429) && attempt < fallbackModels.length) {
-           console.warn(`[Agent-Trend] 503/429 Error on ${fallbackModels[attempt-1]}. Waiting 2.5s before fallback to ${fallbackModels[attempt]}...`);
-           await new Promise(resolve => setTimeout(resolve, 2500));
+           const waitMs = is429 ? 10000 : 3000;
+           console.warn(`[Agent-Trend] 503/429 Error on ${fallbackModels[attempt-1]}. Waiting ${waitMs}ms before fallback to ${fallbackModels[attempt]}...`);
+           await new Promise(resolve => setTimeout(resolve, waitMs));
            continue; 
         } else {
            if (attempt >= fallbackModels.length) {
