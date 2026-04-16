@@ -369,39 +369,39 @@ export default function Home() {
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog1')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 hover:border-purple-400 text-purple-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 hover:border-indigo-400 text-indigo-300 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                      {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-5 h-5 animate-spin text-purple-600" /> : <Sparkles className="w-5 h-5 text-purple-600" />}
-                      <span className="text-base">1. 첫번째 블로그 추출 (보라/블루 썸네일)</span>
+                      {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-5 h-5 animate-spin text-indigo-400" /> : <Sparkles className="w-5 h-5 text-indigo-400" />}
+                      <span className="text-base text-indigo-100">1. 첫번째 블로그 추출 (네이비/퍼플 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-purple-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
+                    <span className="text-xs font-normal text-indigo-300/80 ml-7">재테크 중심 정부지원금 + 경제/정치 핫이슈 트렌드 자동 발굴</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog2')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 hover:border-emerald-400 text-emerald-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-slate-800 to-cyan-900/40 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                       {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <Sparkles className="w-5 h-5 text-emerald-600" />}
-                      <span className="text-base">2. 두번째 블로그 추출 (그린/에메랄드 썸네일)</span>
+                       {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-cyan-400" /> : <Sparkles className="w-5 h-5 text-cyan-400" />}
+                      <span className="text-base text-cyan-100">2. 두번째 블로그 추출 (미드나이트/사이언 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-emerald-700 ml-7">일반 트렌드 + 경제 핫이슈 자동 추출 및 전용 썸네일 생성</span>
+                    <span className="text-xs font-normal text-cyan-300/80 ml-7">IT/테크 기기 + 리빙/가전 실생활 꿀템 핫이슈 자동 추출</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog3')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 hover:border-red-400 text-red-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className="w-full px-5 py-4 bg-gradient-to-r from-rose-900/40 to-pink-900/40 border border-rose-500/30 hover:border-rose-400 text-rose-300 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
                   >
                     <div className="flex items-center gap-2">
-                       {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <Sparkles className="w-5 h-5 text-red-600" />}
-                      <span className="text-base">3. 세번째 블로그 추출 (레드/오렌지 썸네일)</span>
+                       {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-rose-400" /> : <Sparkles className="w-5 h-5 text-rose-400" />}
+                      <span className="text-base text-rose-100">3. 세번째 블로그 추출 (코랄/로즈 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-red-700 ml-7">순수 홈판 저격 어그로 특화 (연예/대기업/가십)</span>
+                    <span className="text-xs font-normal text-rose-300/80 ml-7">4060 일상 건강 상식 + 생존 웰니스 꿀팁 트렌드 자동 발굴</span>
                   </button>
                 </div>
 
