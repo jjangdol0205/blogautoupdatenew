@@ -7,6 +7,7 @@ export default function Home() {
   const [keyword, setKeyword] = useState("");
   const [bcTitle, setBcTitle] = useState("");
   const [bcLink, setBcLink] = useState("");
+  const [bcStrategy, setBcStrategy] = useState("알아서 최적화 (AI 판단)");
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
@@ -79,17 +80,9 @@ export default function Home() {
     
     let currentKeyword = overrideKeyword || keyword;
     
-    if (category === 'brandconnect') {
-      if (!bcTitle.trim() || !bcLink.trim()) {
-        setErrorMsg("네이버 브랜드 커넥트: 상품명과 제휴 링크를 반드시 입력해주세요.");
-        return;
-      }
-      currentKeyword = `상품명: ${bcTitle}\n제휴링크: ${bcLink}`;
-    } else {
-      if (!currentKeyword.trim()) return;
-    }
+    if (!currentKeyword.trim()) return;
 
-    if (overrideKeyword && category !== 'brandconnect') {
+    if (overrideKeyword) {
       setKeyword(overrideKeyword);
     }
 
@@ -264,7 +257,7 @@ export default function Home() {
     }
   };
 
-  const renderTrendBlock = (trends: any[], title: string, icon: React.ReactNode, type: 'purple' | 'blue' | 'emerald', category: string) => {
+  const renderTrendBlock = (trends: any[], title: string, icon: React.ReactNode, type: 'purple' | 'blue' | 'emerald' | 'red', category: string) => {
     if (trends.length === 0) return null;
     
     const colorMap = {
@@ -282,6 +275,11 @@ export default function Home() {
         bg: 'bg-emerald-50', border: 'border-emerald-100', titleText: 'text-emerald-900', badgeInfo: 'bg-emerald-600', 
         cardBorder: 'border-emerald-100', cardTitle: 'text-emerald-900 hover:text-emerald-600', 
         btn: 'bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border-emerald-200 hover:border-emerald-600'
+      },
+      red: {
+        bg: 'bg-red-50', border: 'border-red-100', titleText: 'text-red-900', badgeInfo: 'bg-red-600', 
+        cardBorder: 'border-red-100', cardTitle: 'text-red-900 hover:text-red-600', 
+        btn: 'bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border-red-200 hover:border-red-600'
       }
     };
     const colors = colorMap[type];
@@ -402,69 +400,41 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-2">
                        <DollarSign className="w-5 h-5 text-orange-600" />
-                      <span className="text-base">3. 🛍️ 브랜드 커넥트 전용봇 (수익화)</span>
+                  <button
+                    type="button"
+                    onClick={() => fetchAiTrendMiner('blog3')}
+                    disabled={isAnyLoading}
+                    className="w-full px-5 py-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 hover:border-red-400 text-red-900 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                  >
+                    <div className="flex items-center gap-2">
+                       {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <Sparkles className="w-5 h-5 text-red-600" />}
+                      <span className="text-base">3. 세번째 블로그 추출 (레드/오렌지 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-orange-700 ml-7">스마트폰으로 링크만 복붙하면 영업글+썸네일 자동 생성</span>
+                    <span className="text-xs font-normal text-red-700 ml-7">순수 홈판 저격 어그로 특화 (연예/대기업/가십)</span>
                   </button>
                 </div>
 
-                {activeBlogStyle !== 'brandconnect' ? (
-                  <>
-                    {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeBlogStyle === 'blog1' ? 'purple' : activeBlogStyle === 'blog2' ? 'emerald' : 'blue', activeBlogStyle)}
+                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeBlogStyle === 'blog1' ? 'purple' : activeBlogStyle === 'blog2' ? 'emerald' : 'red', activeBlogStyle)}
 
-                    <div className="flex items-center gap-3 my-6">
-                      <div className="h-px bg-gray-200 flex-1"></div>
-                      <span className="text-sm font-semibold text-gray-500">또는</span>
-                      <div className="h-px bg-gray-200 flex-1"></div>
-                    </div>
+                <div className="flex items-center gap-3 my-6">
+                  <div className="h-px bg-gray-200 flex-1"></div>
+                  <span className="text-sm font-semibold text-gray-500">또는</span>
+                  <div className="h-px bg-gray-200 flex-1"></div>
+                </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="keyword" className="block text-sm font-semibold">
-                        직접 작성할 키워드 입력 <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        id="keyword"
-                        type="text"
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        placeholder="직접 작성하고 싶은 특정 키워드가 있다면 입력하세요."
-                        className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div className="mt-6 bg-orange-50 p-6 rounded-2xl border border-orange-200 shadow-sm animate-fade-in space-y-4">
-                    <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
-                      💸 네이버 브랜드 커넥트 자동화 봇
-                    </h3>
-                    <p className="text-sm text-orange-800 mb-4">
-                      🚨 <span className="font-bold">네이버 보안 정책상 링크만으로는 AI가 내역을 볼 수 없습니다!</span><br/>
-                      진짜 번거로우시겠지만 <b>상품명</b>만 짧게 적어주시면, AI가 알아서 검색해보고 기가 막힌 홍보글을 써줍니다!
-                    </p>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-orange-900 mb-1">어떤 상품인가요? (상품명) <span className="text-red-500">*</span></label>
-                        <input
-                          type="text"
-                          value={bcTitle}
-                          onChange={(e) => setBcTitle(e.target.value)}
-                          placeholder="예: 코지마 목어깨 안마기 (대충이라도 꼭 적어주세요!)"
-                          className="w-full px-4 py-3 rounded-md border border-orange-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-orange-900 mb-1">제휴 링크 <span className="text-red-500">*</span></label>
-                        <input
-                          type="text"
-                          value={bcLink}
-                          onChange={(e) => setBcLink(e.target.value)}
-                          placeholder="예: https://naver.me/..."
-                          className="w-full px-4 py-3 rounded-md border border-orange-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <label htmlFor="keyword" className="block text-sm font-semibold">
+                    직접 작성할 키워드 입력 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="keyword"
+                    type="text"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="직접 작성하고 싶은 특정 키워드가 있다면 입력하세요."
+                    className="w-full px-4 py-3 rounded-md border border-gray-300 focus:border-[#00c73c] focus:ring-1 focus:ring-[#00c73c] outline-none transition-all"
+                  />
+                </div>
 
               </div>
 
@@ -489,7 +459,7 @@ export default function Home() {
                 ) : (
                   <>
                     <PenTool className="w-5 h-5" />
-                    {activeBlogStyle === 'brandconnect' ? '입력된 정보로 제휴 마케팅 글 생성' : `입력된 키워드로 포스팅 생성 (${activeBlogStyle === 'blog1' ? '첫번째 블로그' : '두번째 블로그'} 썸네일)`}
+                    {`입력된 키워드로 포스팅 생성 (${activeBlogStyle === 'blog1' ? '첫번째 블로그' : activeBlogStyle === 'blog2' ? '두번째 블로그' : '세번째 블로그'} 썸네일)`}
                   </>
                 )}
               </button>
