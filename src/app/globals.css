@@ -1,16 +1,16 @@
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: #ffffff;
+  --foreground: #0f172a;
   
   --primary: #06b6d4; /* Tech Cyan */
   --primary-hover: #0891b2;
   --primary-foreground: #ffffff;
   
-  --surface: #1e293b;
-  --surface-hover: #334155;
+  --surface: #f8fafc;
+  --surface-hover: #f1f5f9;
   
-  --border: #334155;
-  --border-focus: #475569;
+  --border: #e2e8f0;
+  --border-focus: #cbd5e1;
   
   --ring: rgba(6, 182, 212, 0.3);
   
@@ -22,27 +22,27 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-premium: 0 20px 40px -10px rgb(0 0 0 / 0.4), 0 0 20px -5px rgb(6, 182, 212 / 0.2);
+  --shadow-premium: 0 20px 40px -10px rgb(0 0 0 / 0.1), 0 0 20px -5px rgb(6, 182, 212 / 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
+    --background: #ffffff;
+    --foreground: #0f172a;
     
     --primary: #06b6d4;
     --primary-hover: #0891b2;
     --primary-foreground: #ffffff;
     
-    --surface: #1e293b;
-    --surface-hover: #334155;
+    --surface: #f8fafc;
+    --surface-hover: #f1f5f9;
     
-    --border: #334155;
-    --border-focus: #475569;
+    --border: #e2e8f0;
+    --border-focus: #cbd5e1;
     
     --ring: rgba(6, 182, 212, 0.3);
     
-    --shadow-premium: 0 20px 40px -10px rgb(0 0 0 / 0.4), 0 0 20px -5px rgb(6, 182, 212 / 0.2);
+    --shadow-premium: 0 20px 40px -10px rgb(0 0 0 / 0.1), 0 0 20px -5px rgb(6, 182, 212 / 0.1);
   }
 }
 
