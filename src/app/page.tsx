@@ -474,7 +474,7 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                  <div id="generated-title" className="p-4 bg-white border border-gray-200 rounded-md shadow-sm font-semibold selection:bg-green-200 selection:text-green-900">
+                  <div id="generated-title" className="p-4 bg-white text-black border border-gray-200 rounded-md shadow-sm font-semibold selection:bg-green-200 selection:text-green-900" style={{ color: '#000000', backgroundColor: '#ffffff' }}>
                     {result.title}
                   </div>
                 </div>
@@ -503,7 +503,8 @@ export default function Home() {
 
                   <div 
                     id="generated-content"
-                    className="p-5 bg-white border border-gray-200 rounded-md shadow-sm min-h-[300px] text-gray-800 leading-relaxed text-[15px] prose max-w-none selection:bg-green-200 selection:text-green-900"
+                    className="p-5 bg-white text-black border border-gray-200 rounded-md shadow-sm min-h-[300px] leading-relaxed text-[15px] prose max-w-none selection:bg-green-200 selection:text-green-900"
+                    style={{ color: '#000000', backgroundColor: '#ffffff' }}
                     dangerouslySetInnerHTML={{ __html: result.content }}
                   />
                 </div>
