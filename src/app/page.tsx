@@ -323,11 +323,11 @@ export default function Home() {
       
       <main className="container pt-16 md:pt-24 animate-fade-in">
         <section className="text-center mb-16 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-medium text-cyan-600 mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-bold text-slate-800 mb-6 shadow-sm">
             <Sparkles className="w-4 h-4" />
             <span>AI 기반 네이버 블로그 자동 완성</span>
           </div>
-          <h1 className="heading-1 mb-6">
+          <h1 className="heading-1 mb-6 text-[#005a2b]">
             키워드 하나로 끝내는<br />초고속 블로그 포스팅
           </h1>
           <p className="text-xl text-muted">
@@ -339,8 +339,8 @@ export default function Home() {
         <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 max-w-6xl mx-auto">
           <section className="glass-panel p-8 delay-100 h-fit">
             
-            <h2 className="heading-2 mb-6 flex items-center gap-2">
-              <PenTool className="w-6 h-6 text-cyan-600" />
+            <h2 className="heading-2 mb-6 flex items-center gap-2 text-slate-900">
+              <PenTool className="w-6 h-6 text-slate-800" />
               AI가 알아서 🚀 빈집 털어옵니다
             </h2>
             
@@ -364,44 +364,44 @@ export default function Home() {
                 </div>
 
                 {/* 3 Blog Modes */}
-                <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-slate-300 rounded-sm overflow-hidden">
                   <button
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog1')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 hover:border-indigo-400 text-indigo-700 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'blog1' ? 'bg-green-50/50' : ''}`}
                   >
-                    <div className="flex items-center gap-2">
-                      {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-5 h-5 animate-spin text-indigo-500" /> : <Sparkles className="w-5 h-5 text-indigo-500" />}
-                      <span className="text-base text-indigo-900">1. 첫번째 블로그 추출 (네이비/퍼플 썸네일)</span>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[13px] font-bold text-slate-900 text-left">1. 첫번째 블로그 추출 (네이비/퍼플 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-indigo-700/80 ml-7">재테크 중심 정부지원금 + 경제/정치 핫이슈 트렌드 자동 발굴</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">재테크 중심 정부지원금 + 경제/정치 핫이슈 트렌드 자동 발굴</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog2')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-slate-50 to-cyan-50 border border-cyan-200 hover:border-cyan-400 text-cyan-700 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'blog2' ? 'bg-green-50/50' : ''}`}
                   >
-                    <div className="flex items-center gap-2">
-                       {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-5 h-5 animate-spin text-cyan-500" /> : <Sparkles className="w-5 h-5 text-cyan-500" />}
-                      <span className="text-base text-cyan-900">2. 두번째 블로그 추출 (미드나이트/사이언 썸네일)</span>
+                    <div className="flex items-center gap-1">
+                       {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[13px] font-bold text-slate-900 text-left">2. 두번째 블로그 추출 (미드나이트/사이언 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-cyan-700/80 ml-7">IT/테크 기기 + 리빙/가전 실생활 꿀템 핫이슈 자동 추출</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">IT/테크 기기 + 리빙/가전 실생활 꿀템 핫이슈 자동 추출</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => fetchAiTrendMiner('blog3')}
                     disabled={isAnyLoading}
-                    className="w-full px-5 py-4 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 hover:border-rose-400 text-rose-700 font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 flex flex-col items-start gap-1"
+                    className={`w-full px-3 py-3 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'blog3' ? 'bg-green-50/50' : ''}`}
                   >
-                    <div className="flex items-center gap-2">
-                       {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-5 h-5 animate-spin text-rose-500" /> : <Sparkles className="w-5 h-5 text-rose-500" />}
-                      <span className="text-base text-rose-900">3. 세번째 블로그 추출 (코랄/로즈 썸네일)</span>
+                    <div className="flex items-center gap-1">
+                       {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[13px] font-bold text-slate-900 text-left">3. 세번째 블로그 추출 (코랄/로즈 썸네일)</span>
                     </div>
-                    <span className="text-xs font-normal text-rose-700/80 ml-7">4060 일상 건강 상식 + 생존 웰니스 꿀팁 트렌드 자동 발굴</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">4060 일상 건강 상식 + 생존 웰니스 꿀팁 트렌드 자동 발굴</span>
                   </button>
                 </div>
 
@@ -440,7 +440,7 @@ export default function Home() {
                 type="submit"
                 disabled={isAnyLoading}
                 onClick={(e) => handleGenerate(e, undefined, activeBlogStyle)}
-                className="w-full btn btn-primary py-4 text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-4 text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed bg-[#00c73c] hover:bg-[#00a832] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
