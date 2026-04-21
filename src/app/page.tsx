@@ -375,7 +375,7 @@ export default function Home() {
                       {isTrendLoading && activeBlogStyle === 'blog1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[13px] font-bold text-slate-900 text-left">1. 첫번째 블로그 추출 (네이비/퍼플 썸네일)</span>
                     </div>
-                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">재테크 중심 정부지원금 + 경제/정치 핫이슈 트렌드 자동 발굴</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">특판/지원금/부동산 + 생활비 방어 및 사회 공분 경제 이슈</span>
                   </button>
 
                   <button
@@ -388,7 +388,7 @@ export default function Home() {
                        {isTrendLoading && activeBlogStyle === 'blog2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[13px] font-bold text-slate-900 text-left">2. 두번째 블로그 추출 (미드나이트/사이언 썸네일)</span>
                     </div>
-                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">IT/테크 기기 + 리빙/가전 실생활 꿀템 핫이슈 자동 추출</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">60대 시니어 특화 (국민연금/의료비 방어 + 미스터트롯/가십 핫이슈)</span>
                   </button>
 
                   <button
@@ -401,7 +401,7 @@ export default function Home() {
                        {isTrendLoading && activeBlogStyle === 'blog3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[13px] font-bold text-slate-900 text-left">3. 세번째 블로그 추출 (코랄/로즈 썸네일)</span>
                     </div>
-                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">4060 일상 건강 상식 + 생존 웰니스 꿀팁 트렌드 자동 발굴</span>
+                    <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">금융/지원금 하이브리드 (고금리 예적금 + 시니어 숨은 정부지원금)</span>
                   </button>
                 </div>
 
