@@ -11,27 +11,45 @@ export async function GET(request: Request) {
     const bgUrl = searchParams.get('bg');
     const style = searchParams.get('style') || 'blog1';
 
-    let bgGradient = 'linear-gradient(to bottom right, #1E1B4B, #4F46E5)'; // blog1 (Deep Indigo/Purple)
+    let bgGradient = 'linear-gradient(to bottom right, #1E1B4B, #4F46E5)';
     let glowOrb1 = '#818CF8';
     let glowOrb2 = '#C084FC';
     let badgeColor = '#4338CA';
     let badgeBg = 'rgba(67, 56, 202, 0.1)';
     let bottomTextColor = '#8B5CF6';
 
-    if (style === 'blog2') {
-      bgGradient = 'linear-gradient(to bottom right, #0F172A, #06B6D4)'; // blog2 (Tech Midnight/Cyan)
-      glowOrb1 = '#22D3EE';
-      glowOrb2 = '#818CF8';
-      badgeColor = '#0891B2';
-      badgeBg = 'rgba(8, 145, 178, 0.1)';
-      bottomTextColor = '#06B6D4';
-    } else if (style === 'blog3') {
-      bgGradient = 'linear-gradient(to right, #BE123C, #F43F5E)'; // blog3 (Vibrant Coral/Rose)
-      glowOrb1 = '#FDA4AF';
-      glowOrb2 = '#FB7185';
-      badgeColor = '#E11D48';
-      badgeBg = 'rgba(225, 29, 72, 0.1)';
-      bottomTextColor = '#F43F5E';
+    // Site 1
+    if (style === 'site1_bot1' || style === 'blog1') {
+      bgGradient = 'linear-gradient(to bottom right, #1E1B4B, #4F46E5)'; // Deep Indigo/Purple
+      glowOrb1 = '#818CF8'; glowOrb2 = '#C084FC'; badgeColor = '#4338CA'; badgeBg = 'rgba(67, 56, 202, 0.1)'; bottomTextColor = '#8B5CF6';
+    } else if (style === 'site1_bot2' || style === 'blog2') {
+      bgGradient = 'linear-gradient(to bottom right, #0F172A, #06B6D4)'; // Tech Midnight/Cyan
+      glowOrb1 = '#22D3EE'; glowOrb2 = '#818CF8'; badgeColor = '#0891B2'; badgeBg = 'rgba(8, 145, 178, 0.1)'; bottomTextColor = '#06B6D4';
+    } else if (style === 'site1_bot3' || style === 'blog3') {
+      bgGradient = 'linear-gradient(to right, #BE123C, #F43F5E)'; // Vibrant Coral/Rose
+      glowOrb1 = '#FDA4AF'; glowOrb2 = '#FB7185'; badgeColor = '#E11D48'; badgeBg = 'rgba(225, 29, 72, 0.1)'; bottomTextColor = '#F43F5E';
+    } 
+    // Site 2
+    else if (style === 'site2_bot1') {
+      bgGradient = 'linear-gradient(to bottom right, #064E3B, #10B981)'; // Emerald/Forest
+      glowOrb1 = '#34D399'; glowOrb2 = '#6EE7B7'; badgeColor = '#047857'; badgeBg = 'rgba(4, 120, 87, 0.1)'; bottomTextColor = '#10B981';
+    } else if (style === 'site2_bot2') {
+      bgGradient = 'linear-gradient(to bottom right, #7C2D12, #F59E0B)'; // Sunset Orange/Gold
+      glowOrb1 = '#FCD34D'; glowOrb2 = '#FBBF24'; badgeColor = '#B45309'; badgeBg = 'rgba(180, 83, 9, 0.1)'; bottomTextColor = '#F59E0B';
+    } else if (style === 'site2_bot3') {
+      bgGradient = 'linear-gradient(to bottom right, #1E293B, #F472B6)'; // Slate/Neon Pink
+      glowOrb1 = '#FBCFE8'; glowOrb2 = '#F9A8D4'; badgeColor = '#DB2777'; badgeBg = 'rgba(219, 39, 119, 0.1)'; bottomTextColor = '#F472B6';
+    }
+    // Site 3
+    else if (style === 'site3_bot1') {
+      bgGradient = 'linear-gradient(to bottom right, #172554, #3B82F6)'; // Royal Blue/Sky
+      glowOrb1 = '#93C5FD'; glowOrb2 = '#60A5FA'; badgeColor = '#1D4ED8'; badgeBg = 'rgba(29, 78, 216, 0.1)'; bottomTextColor = '#3B82F6';
+    } else if (style === 'site3_bot2') {
+      bgGradient = 'linear-gradient(to bottom right, #4A044E, #D946EF)'; // Deep Magenta/Peach
+      glowOrb1 = '#F0ABFC'; glowOrb2 = '#E879F9'; badgeColor = '#A21CAF'; badgeBg = 'rgba(162, 28, 175, 0.1)'; bottomTextColor = '#D946EF';
+    } else if (style === 'site3_bot3') {
+      bgGradient = 'linear-gradient(to bottom right, #000000, #451A03)'; // Monochrome Black/Gold
+      glowOrb1 = '#FDE047'; glowOrb2 = '#FEF08A'; badgeColor = '#854D0E'; badgeBg = 'rgba(133, 77, 14, 0.1)'; bottomTextColor = '#CA8A04';
     }
 
     // 해시태그 형식으로 변환 (앞에 #이 없으면 단어별로 # 추가)
