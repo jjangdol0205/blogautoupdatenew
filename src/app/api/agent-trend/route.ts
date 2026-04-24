@@ -94,7 +94,7 @@ export async function POST(req: Request) {
     };
     
     // 호환성을 위해 기존 blog1, blog2, blog3 입력 시 site1_bot 시리즈로 맵핑
-    const normalizedStyle = style.startsWith('blog') ? \`site1_bot\${style.replace('blog', '')}\` : style;
+    const normalizedStyle = style.startsWith('blog') ? `site1_bot${style.replace('blog', '')}` : style;
     const botConfig = botConfigs[normalizedStyle] || botConfigs['site1_bot1'];
 
     let prompt = `
@@ -133,7 +133,7 @@ ${feedbackLearningGuidance}
     }
   ]
 }
-\`;
+`;
 
     let response;
     // 2.5 버전이 터졌을 경우, 가장 우수하고 안정적인 gemini-pro를 최우선 투입합니다
