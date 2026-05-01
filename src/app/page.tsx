@@ -20,8 +20,7 @@ export default function Home() {
   // 통합 트렌드 (일반 + 경제)
   const [aiTrends, setAiTrends] = useState<any[]>([]);
   const [isTrendLoading, setIsTrendLoading] = useState(false);
-  const [activeSite, setActiveSite] = useState<'site1' | 'site2' | 'site3'>('site1');
-  const [activeBlogStyle, setActiveBlogStyle] = useState('site1_bot1');
+  const [activeBlogStyle, setActiveBlogStyle] = useState('bot1');
   const [trendCoreKeyword, setTrendCoreKeyword] = useState("");
 
   const LOCAL_STORAGE_KEY = 'autoblog_keyword_history';
@@ -328,10 +327,8 @@ export default function Home() {
             <Sparkles className="w-4 h-4" />
             <span>AI 기반 네이버 블로그 자동 완성</span>
           </div>
-          <h1 className={`heading-1 mb-6 transition-colors duration-300 ${activeSite === 'site1' ? 'text-[#005a2b]' : activeSite === 'site2' ? 'text-blue-700' : 'text-purple-700'}`}>
-            {activeSite === 'site1' && <>키워드 하나로 끝내는<br />메인/종합 블로그 자동화</>}
-            {activeSite === 'site2' && <>키워드 하나로 끝내는<br />IT/재테크 블로그 자동화</>}
-            {activeSite === 'site3' && <>키워드 하나로 끝내는<br />트렌드/라이프 블로그 자동화</>}
+          <h1 className="heading-1 mb-6 transition-colors duration-300 text-[#005a2b]">
+            키워드 하나로 끝내는<br />수익형 블로그 포스팅 자동화
           </h1>
           <p className="text-xl text-muted">
             복사/붙여넣기에 최적화된 고품질 초안을 5초 만에 만들어냅니다.<br className="hidden md:block" />
@@ -366,113 +363,53 @@ export default function Home() {
                   <p className="text-xs text-slate-500">두 번째 블로그 추출 시 위 키워드를 기반으로 연관 롱테일을 찾아옵니다.</p>
                 </div>
 
-                {/* Site Selection Tabs */}
-                <div className="flex border border-slate-300 rounded-t-md overflow-hidden bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setActiveSite('site1')}
-                    className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeSite === 'site1' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    Site 1 (메인/종합)
+                {/* 6 Core Bot Modes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-300 rounded-md overflow-hidden">
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot1')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot1' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">1호기 (지원금/복지)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">보조금/캐시백 및 미신청 손실 공포</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSite('site2')}
-                    className={`flex-1 py-3 border-l border-r border-slate-300 text-[13px] font-bold transition-colors ${activeSite === 'site2' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    Site 2 (IT/투자/부업)
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot2')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot2' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">2호기 (예적금/특판)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">고금리 특판 마감/기회비용 공포</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSite('site3')}
-                    className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeSite === 'site3' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    Site 3 (트렌드/라이프)
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot3')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot3' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">3호기 (연금/시니어)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">국민연금 개혁 및 건보료 폭탄 방어</span>
+                  </button>
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot4')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot4' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot4' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">4호기 (부동산/청약)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">로또 무순위 청약 및 벼락거지 공포</span>
+                  </button>
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot5')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white md:border-r border-b md:border-b-0 border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot5' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot5' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">5호기 (도파민/이슈)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">화제의 인물, 논란, 대중의 관음증 자극</span>
+                  </button>
+                  <button type="button" onClick={() => fetchAiTrendMiner('bot6')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot6' ? 'bg-green-50/50' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && activeBlogStyle === 'bot6' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">6호기 (세금/절세)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">환급금 찾기 및 세금 신고 누락 가산세 공포</span>
                   </button>
                 </div>
 
-                {/* 3 Bot Modes Per Site */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-t-0 border-slate-300 rounded-b-md overflow-hidden">
-                  {activeSite === 'site1' && (
-                    <>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site1_bot1')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site1_bot1' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site1_bot1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">1호기 (메인 경제/이슈)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">짠테크/사건사고 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site1_bot2')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site1_bot2' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site1_bot2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">2호기 (시니어/건강)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">질병 공포/사기 경고 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site1_bot3')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site1_bot3' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site1_bot3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">3호기 (도파민/가십)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">연예계 폭로/MZ 핫이슈 특화</span>
-                      </button>
-                    </>
-                  )}
-
-                  {activeSite === 'site2' && (
-                    <>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site2_bot1')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site2_bot1' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site2_bot1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">4호기 (IT/테크 전문)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">가성비 기기/루머 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site2_bot2')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site2_bot2' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site2_bot2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">5호기 (주식/투자 전문)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">급등락 이슈/공포 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site2_bot3')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site2_bot3' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site2_bot3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">6호기 (부업/절세 전문)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">수익화 꿀팁/환급금 특화</span>
-                      </button>
-                    </>
-                  )}
-
-                  {activeSite === 'site3' && (
-                    <>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site3_bot1')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site3_bot1' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site3_bot1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">7호기 (트렌드/핫플)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">지역 축제/한정판 아이템 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site3_bot2')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white border-r border-slate-300 last:border-r-0 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site3_bot2' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site3_bot2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">8호기 (뷰티/다이어트)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">초단기 다이어트/홈케어 특화</span>
-                      </button>
-                      <button type="button" onClick={() => fetchAiTrendMiner('site3_bot3')} disabled={isAnyLoading} className={`w-full px-3 py-3 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'site3_bot3' ? 'bg-green-50/50' : ''}`}>
-                        <div className="flex items-center gap-1">
-                          {isTrendLoading && activeBlogStyle === 'site3_bot3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                          <span className="text-[13px] font-bold text-slate-900 text-left">9호기 (여행/호캉스)</span>
-                        </div>
-                        <span className="text-[11px] font-normal text-slate-600 leading-tight text-left">특가 항공권/가성비 호캉스 특화</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, activeSite === 'site1' ? 'purple' : activeSite === 'site2' ? 'blue' : 'red', activeBlogStyle)}
+                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, 'emerald', activeBlogStyle)}
 
                 <div className="flex items-center gap-3 my-6">
                   <div className="h-px bg-slate-200 flex-1"></div>
