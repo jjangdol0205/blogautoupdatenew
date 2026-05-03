@@ -205,10 +205,10 @@ if __name__ == "__main__":
         # 클라우드 환경: 딱 한 번만 실행 후 종료
         run_crawler()
     else:
-        # 로컬 환경: 처음 1회 실행 후 1시간 간격 무한 반복
+        # 로컬 환경: 처음 1회 실행 후 15분 간격 무한 반복
         run_crawler()
-        schedule.every(1).hours.do(run_crawler)
-        print("\n1시간 간격 트렌드 크롤러가 시작되었습니다. (종료하려면 Ctrl+C를 누르세요)")
+        schedule.every(15).minutes.do(run_crawler)
+        print("\n15분 간격 트렌드 크롤러가 시작되었습니다. (종료하려면 Ctrl+C를 누르세요)")
         while True:
             schedule.run_pending()
             time.sleep(60)
