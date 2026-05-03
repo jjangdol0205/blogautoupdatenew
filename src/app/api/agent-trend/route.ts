@@ -89,20 +89,39 @@ export async function POST(req: Request) {
         target: '직장인, 프리랜서, 자영업자',
         unique1: '5월 종합소득세, 연말정산, 양도소득세 등 세금 환급금 찾기 및 절세 노하우',
         unique2: '세금 신고 누락 시 발생하는 가산세 폭탄 공포 자극'
+      },
+      'bot7': {
+        name: '"자동봇 7호기(정치/우파 시각 전문)"',
+        target: '보수적 정치/사회 관심층',
+        unique1: '보수/우파 정치권 주요 인물, 안보, 자유시장경제, 기업 규제 완화 이슈',
+        unique2: '우파 시각에서의 사회 문제 비판 및 안보/경제 불안감 자극'
+      },
+      'bot8': {
+        name: '"자동봇 8호기(정치/좌파 시각 전문)"',
+        target: '진보적 정치/사회 관심층',
+        unique1: '진보/좌파 정치권 주요 인물, 평등, 복지 확대, 노동권, 민생 지원 이슈',
+        unique2: '좌파 시각에서의 정책 비판 및 서민 경제/불평등에 대한 불안감 자극'
+      },
+      'bot9': {
+        name: '"자동봇 9호기(네이트판/온라인 썰 전문)"',
+        target: '10~40대 커뮤니티 이슈/썰 소비층',
+        unique1: '네이트판 톡톡, 블라인드 등 온라인 커뮤니티 레전드 썰, 고부갈등, 사이다썰, 연애상담',
+        unique2: '대중의 강력한 공감/분노 도파민 유발 및 인간관계 파탄에 대한 두려움 자극'
       }
     };
     
-    // 입력된 style(예: blog1, site2_bot2 등)에서 숫자만 추출하여 1~6호기로 강제 맵핑
+    // 입력된 style(예: blog1, site2_bot2 등)에서 숫자만 추출하여 1~9호기로 강제 맵핑
     const numMatch = style.match(/\d+/);
     const styleNumber = numMatch ? parseInt(numMatch[0]) : 1;
-    // 6호기를 초과하는 요청이 오더라도 1~6 안에서 순환하도록 처리
-    const mappedNumber = styleNumber > 6 ? ((styleNumber - 1) % 6) + 1 : styleNumber; 
+    // 9호기를 초과하는 요청이 오더라도 1~9 안에서 순환하도록 처리
+    const mappedNumber = styleNumber > 9 ? ((styleNumber - 1) % 9) + 1 : styleNumber; 
     const botConfig = botConfigs[`bot${mappedNumber}`] || botConfigs['bot1'];
 
     let prompt = `
 당신은 대한민국 상위 0.1% 네이버 블로그 메가 트래픽 마스터(SEO 전문가)이자, **${botConfig.target} 타겟 블로그**를 운영하는 ${botConfig.name} 편집장입니다.
 현재 이 블로그는 하루 10~15개의 포스팅을 발행하고 있으며, 각 포스팅당 **'조회수 1만 회 이상 달성'**을 목표로 합니다.
-하루 글이 절대 겹치지 않도록 추천 범위를 넓혀 **조회수 1만 이상이 찍힐 수 있는 폭발적인 메가 트렌드 롱테일 키워드 딱 5개**를 발굴해야 합니다.
+하루 글이 절대 겹치지 않도록 추천 범위를 극단적으로 넓혀 **조회수 1만 이상이 찍힐 수 있는 폭발적인 메가 트렌드 롱테일 키워드 딱 5개**를 발굴해야 합니다.
+[극단적 다양성 확보 지시] 추출하는 5개의 키워드는 소재, 타겟, 접근 방식이 서로 완전히 달라야 하며, 이 봇을 연달아 10번을 실행하더라도 절대 같은 내용(주제, 소재, 인물)이 나오지 않도록 광범위한 세부 롱테일을 탐색하세요.
 ${bannedSection}
 ${feedbackLearningGuidance}
 
