@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+schedule
+pandas
+google-generativeai
+python-dotenv
