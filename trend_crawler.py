@@ -74,8 +74,41 @@ def fetch_nate_pann():
         print(f"네이트판 수집 오류: {e}")
         return []
 
-# Gemini로 황금 키워드 추출 (더블 체크 로직)
-def extract_golden_keywords_with_gemini(daum_headlines, nate_stories):
+# 과거 키워드 로드 (최근 50개)
+def get_past_keywords():
+    try:
+        if os.path.exists(CSV_FILE):
+            df = pd.read_csv(CSV_FILE)
+            if 'title' in df.columns:
+                return df['title'].tail(50).tolist()
+    except Exception as e:
+        print(f"과거 키워드 로드 실패: {e}")
+    return []
+
+# AI 자가 학습 및 전략 수립 (Agonize)
+def generate_daily_breakthrough_strategy(past_keywords):
+    if not past_keywords:
+        return "과거 데이터가 부족하여 기본 9대 카테고리(정치, 복지, 예적금, 연금, 부동산, 세금, 이슈 등)를 유지합니다."
+        
+    prompt = f"""
+    당신은 블로그 트렌드 전략가입니다.
+    현재 블로그 조회수가 정체되어 있습니다. 아래는 최근 생성했던 50개의 블로그 키워드 목록입니다.
+    
+    [최근 50개 키워드 목록]
+    {chr(10).join(past_keywords)}
+    
+    위 키워드들이 왜 독자들의 클릭을 유도하지 못했는지(뻔한 주제, 후킹 부족 등) 뼈아프게 반성(Agonize)하고,
+    오늘 조회수 1만뷰를 터트리기 위해 완전히 새롭고 시의성 있는 "블루오션 카테고리 전략 3가지"를 제안해 주세요.
+    """
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"전략 수립 중 오류 발생: {e}")
+        return "기본 9대 카테고리(정치, 복지, 예적금, 연금, 부동산, 세금, 이슈 등)를 유지합니다."
+
+# Gemini로 황금 키워드 추출 (동적 전략 반영)
+def extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy):
     all_issues = []
     if daum_headlines:
         all_issues.append("[다음 뉴스 랭킹]")
@@ -87,30 +120,22 @@ def extract_golden_keywords_with_gemini(daum_headlines, nate_stories):
     if not all_issues:
         return []
         
-    prompt = """
+    prompt = f"""
     당신은 대한민국 상위 0.1% 조회수를 이끌어내는 블로그 트렌드 마스터입니다.
     아래는 현재 인터넷에서 가장 뜨거운 실시간 뉴스 및 커뮤니티 썰 목록입니다.
     이 목록을 분석하여, 블로그 포스팅 시 '조회수 1만 뷰 이상'을 달성할 수 있는 "고부가가치 황금 키워드/후킹 제목"을 추출해 주셔야 합니다.
-    단순한 기사 제목 복사가 아니라, 사람들의 공포(FOMO), 호기심, 돈(지원금/절약), 도파민을 강력하게 자극하는 형태로 더블 체크 및 정제해야 합니다.
+    
+    [오늘의 맞춤형 돌파 전략 (AI 자가 반성 기반)]
+    {strategy}
+    
+    위 전략을 바탕으로 기존의 뻔한 주제를 버리고, 사람들의 공포(FOMO), 호기심, 돈, 도파민을 강력하게 자극하는 롱테일 키워드를 기획하세요.
     
     [🚨 치명적 주의사항 (가짜 뉴스 생성 절대 금지) 🚨]
     - 원본 뉴스 제목에 없는 '없는 사실, 조작된 수치, 거짓된 혜택'을 절대 지어내지 마세요.
-    - 자극적인 제목을 만들더라도 100% 팩트를 기반으로 해야 하며, 독자를 기만하는 명백한 허위 사실(가짜 뉴스)을 생성하면 안 됩니다.
-    
-    [9가지 필수 카테고리]
-    1. 정치 우파 관점 (장동혁 등 국힘 주요 인물, 이재명 정부 정책 비판, 2026 지방선거 여론조사 및 판세 분석)
-    2. 정치 좌파 관점 (이재명 정부 정책 방어 및 성과, 장동혁 등 국힘 비판, 2026 지방선거 여론조사 및 판세 분석)
-    3. 보조금/지원금/복지 (국가 및 지자체 지원 혜택)
-    4. 예적금/특판 (고금리 상품 및 금융 정보)
-    5. 연금/시니어 (국민연금, 건강보험, 시니어 관련 이슈)
-    6. 부동산/청약 (청약 일정, 부동산 시세 변동)
-    7. 세금/절세 (종합소득세 등 세금 환급 및 절세 팁)
-    8. 도파민/이슈 (사회적 논란, 화제의 인물, 연예인 이슈)
-    9. 네이트판 인기 스토리 (커뮤니티 레전드 썰, 공감 유발 사연)
+    - 자극적인 제목을 만들더라도 100% 팩트를 기반으로 해야 하며, 독자를 기만하는 허위 사실을 생성하면 안 됩니다.
     
     [출력 형식]
-    각 카테고리별로 가장 파급력이 클 것 같은 "정제된 키워드(또는 제목)"를 1~2개씩만 뽑아주세요.
-    억지로 불안감이나 공포를 조장하지 말고, 뉴스의 본질을 살리면서 클릭을 유도하는 자연스러운 롱테일 키워드로 만들어주세요.
+    돌파 전략에 맞춰 파급력이 클 것 같은 "정제된 키워드(또는 제목)"를 10~15개 정도 뽑아주세요.
     반드시 다음과 같이 "정제된 키워드 | 카테고리명" 형식으로 한 줄씩 출력해주세요. 다른 부연 설명은 절대 적지 마세요.
     (예시: 2026 숨은 정부지원금, 내가 받을 수 있는 혜택 확인하기 | 보조금/지원금/복지)
     
@@ -149,8 +174,15 @@ def run_crawler():
     print(f"수집된 네이트판 스토리 수: {len(nate_stories)}")
     
     if daum_headlines or nate_stories:
-        print("Gemini API로 1만뷰 타겟 황금 키워드 추출 및 정제 중 (더블 체크)...")
-        refined_keywords = extract_golden_keywords_with_gemini(daum_headlines, nate_stories)
+        print("\n[AI 조회수 정체 돌파 전략 수립 중 (Agonizing)...]")
+        past_keywords = get_past_keywords()
+        strategy = generate_daily_breakthrough_strategy(past_keywords)
+        print("================== [AI 오늘의 반성 및 전략] ==================")
+        print(strategy)
+        print("==============================================================\n")
+        
+        print("Gemini API로 맞춤형 황금 키워드 추출 중...")
+        refined_keywords = extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy)
         
         for item in refined_keywords:
             new_data.append({
