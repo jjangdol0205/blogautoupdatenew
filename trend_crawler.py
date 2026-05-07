@@ -8,6 +8,9 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from datetime import datetime
 import subprocess
+import hmac
+import hashlib
+import base64
 
 # .env.local 파일에서 환경변수 로드 (로컬 환경인 경우)
 if not os.getenv('GITHUB_ACTIONS_ENV'):
@@ -20,6 +23,11 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
+
+# 네이버 검색광고 API 키 로드
+NAVER_AD_CUSTOMER_ID = os.getenv('NAVER_AD_CUSTOMER_ID')
+NAVER_AD_ACCESS_LICENSE = os.getenv('NAVER_AD_ACCESS_LICENSE')
+NAVER_AD_SECRET_KEY = os.getenv('NAVER_AD_SECRET_KEY')
 
 # 저장할 CSV 파일 경로
 CSV_FILE = 'collected_trends.csv'
@@ -73,6 +81,64 @@ def fetch_nate_pann():
     except Exception as e:
         print(f"네이트판 수집 오류: {e}")
         return []
+
+# 네이버 검색광고 API 호출 (검색량 분석)
+def get_naver_search_volumes(keywords):
+    if not NAVER_AD_CUSTOMER_ID or not NAVER_AD_ACCESS_LICENSE or not NAVER_AD_SECRET_KEY:
+        print("네이버 검색광고 API 키가 없습니다. 검색량 검증을 건너뜁니다.")
+        return {k: -1 for k in keywords}
+
+    results = {}
+    # 네이버 API는 한 번에 5개까지만 hintKeywords 조회가 가능하므로 5개씩 쪼개어 요청
+    for i in range(0, len(keywords), 5):
+        batch = keywords[i:i+5]
+        # 공백 제거 후 요청
+        hint_keywords = ",".join([k.replace(" ", "") for k in batch])
+        
+        timestamp = str(int(time.time() * 1000))
+        method = "GET"
+        path = "/keywordstool"
+        message = f"{timestamp}.{method}.{path}"
+        
+        signature = base64.b64encode(hmac.new(NAVER_AD_SECRET_KEY.encode('utf-8'), message.encode('utf-8'), hashlib.sha256).digest()).decode('utf-8')
+        
+        headers = {
+            'X-Timestamp': timestamp,
+            'X-API-KEY': NAVER_AD_ACCESS_LICENSE,
+            'X-Customer': str(NAVER_AD_CUSTOMER_ID),
+            'X-Signature': signature
+        }
+        
+        url = f"https://api.naver.com{path}?hintKeywords={hint_keywords}&showDetail=1"
+        try:
+            res = requests.get(url, headers=headers)
+            if res.status_code == 200:
+                data = res.json()
+                k_list = data.get('keywordList', [])
+                for match in k_list:
+                    rel_k = match.get('relKeyword', '')
+                    pc = match.get('monthlyPcQcCnt', 0)
+                    mob = match.get('monthlyMobileQcCnt', 0)
+                    
+                    if isinstance(pc, str) and '<' in pc: pc = 5
+                    if isinstance(mob, str) and '<' in mob: mob = 5
+                    
+                    total = int(pc) + int(mob)
+                    
+                    # 매칭되는 원래 키워드 찾기 (공백 제거된 것과 매칭)
+                    for original_k in batch:
+                        if original_k.replace(" ", "") == rel_k:
+                            results[original_k] = total
+            time.sleep(0.5) # API Rate limit 보호
+        except Exception as e:
+            print(f"네이버 API 요청 실패: {e}")
+            
+    # 누락된 키워드는 -1로 처리
+    for k in keywords:
+        if k not in results:
+            results[k] = -1
+            
+    return results
 
 # 과거 키워드 로드 (최근 50개)
 def get_past_keywords():
@@ -140,9 +206,9 @@ def extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy):
     - 자극적인 제목을 만들더라도 100% 팩트를 기반으로 해야 하며, 독자를 기만하는 허위 사실을 생성하면 안 됩니다.
     
     [출력 형식]
-    돌파 전략에 맞춰 파급력이 클 것 같은 "정제된 키워드(또는 제목)"를 10~15개 정도 뽑아주세요.
+    돌파 전략에 맞춰 파급력이 클 것 같은 "정제된 키워드(또는 제목)" 후보군을 **넉넉하게 30개** 뽑아주세요.
     반드시 다음과 같이 "정제된 키워드 | 카테고리명" 형식으로 한 줄씩 출력해주세요. 다른 부연 설명은 절대 적지 마세요.
-    (예시: 2026 숨은 정부지원금, 내가 받을 수 있는 혜택 확인하기 | 보조금/지원금/복지)
+    (예시: 2026 숨은 정부지원금 확인하기 | 보조금/지원금/복지)
     
     [실시간 소스 데이터]
     """
@@ -186,17 +252,40 @@ def run_crawler():
         print(strategy)
         print("==============================================================\n")
         
-        print("Gemini API로 맞춤형 황금 키워드 추출 중...")
+        print("Gemini API로 30개의 맞춤형 황금 키워드 후보 추출 중...")
         refined_keywords = extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy)
         
+        # 네이버 검색량 분석
+        print("네이버 검색광고 API를 통한 검색량 기반 필터링 진행 중...")
+        candidates = [item['title'] for item in refined_keywords]
+        volumes = get_naver_search_volumes(candidates)
+        
+        # 필터링 로직: 1000 ~ 50000 구간의 키워드만 선별
+        filtered_keywords = []
         for item in refined_keywords:
+            k = item['title']
+            v = volumes.get(k, -1)
+            # 검색량 조회가 아예 실패했거나(-1), 검색량이 너무 적거나 너무 많은 것은 제외
+            # (단, API가 없을 경우를 대비해 -1은 일단 통과시킬 수도 있지만, 여기서는 -1은 제외)
+            if NAVER_AD_CUSTOMER_ID and NAVER_AD_ACCESS_LICENSE and NAVER_AD_SECRET_KEY:
+                if 1000 <= v <= 50000:
+                    item['title'] = f"{k} [검색량: {v:,}회]"
+                    filtered_keywords.append(item)
+            else:
+                # API 키가 없으면 필터링 없이 통과
+                filtered_keywords.append(item)
+                
+        # 필터링 후 최대 10개만 저장
+        filtered_keywords = filtered_keywords[:10]
+        
+        for item in filtered_keywords:
             new_data.append({
                 'timestamp': timestamp,
-                'source': 'AI Refined',
+                'source': 'AI+Data Refined',
                 'category': item['category'],
                 'title': item['title']
             })
-        
+            
     # 3. CSV 저장 및 중복 제거
     if new_data:
         df_new = pd.DataFrame(new_data)
