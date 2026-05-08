@@ -399,16 +399,16 @@ export default function Home() {
                   <button type="button" onClick={() => fetchAiTrendMiner('bot5')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot5' ? 'bg-green-50/50' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && activeBlogStyle === 'bot5' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">5호기 (이슈/인물)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">5호기 (부동산 대출)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">화제의 인물/논란 자극</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">특례대출/대출한도 축소 공포</span>
                   </button>
                   <button type="button" onClick={() => fetchAiTrendMiner('bot6')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot6' ? 'bg-green-50/50' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && activeBlogStyle === 'bot6' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">6호기 (세금/절세)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">6호기 (부동산 하락)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">세금 누락 가산세 공포</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">급매/경매/영끌족 비명</span>
                   </button>
 
                   {/* Row 3 */}
