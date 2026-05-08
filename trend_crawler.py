@@ -211,7 +211,7 @@ def extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy):
     (예시: 2026 숨은 정부지원금 확인하기 | 보조금/지원금/복지)
     
     [🚨 카테고리명 필수 조건 🚨]
-    카테고리명은 반드시 아래의 9가지 중 하나여야만 합니다. 절대 새로운 카테고리를 임의로 만들지 마세요.
+    카테고리명은 반드시 아래의 12가지 중 하나여야만 합니다. 절대 새로운 카테고리를 임의로 만들지 마세요.
     1. 정치 우파 관점
     2. 정치 좌파 관점
     3. 보조금/지원금/복지
@@ -221,6 +221,9 @@ def extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy):
     7. 세금/절세
     8. 도파민/이슈
     9. 네이트판 인기 스토리
+    10. 드라마/연예인 가십
+    11. 화제의 인물/정치인 가십
+    12. 주식/비트코인 한탕주의
     
     [실시간 소스 데이터]
     """

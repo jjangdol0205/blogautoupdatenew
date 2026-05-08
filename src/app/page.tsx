@@ -20,7 +20,7 @@ export default function Home() {
   // 통합 트렌드 (일반 + 경제)
   const [aiTrends, setAiTrends] = useState<any[]>([]);
   const [isTrendLoading, setIsTrendLoading] = useState(false);
-  const [activeBlogStyle, setActiveBlogStyle] = useState('bot1');
+  const [selectedBots, setSelectedBots] = useState<string[]>([]);
   const [trendCoreKeyword, setTrendCoreKeyword] = useState("");
 
   const LOCAL_STORAGE_KEY = 'autoblog_keyword_history';
@@ -49,23 +49,55 @@ export default function Home() {
     } catch (e) {}
   };
 
-  const fetchAiTrendMiner = async (style: string) => {
-    setActiveBlogStyle(style);
+  const toggleBotSelection = (botId: string) => {
+    setSelectedBots(prev => {
+      if (prev.includes(botId)) {
+        return prev.filter(id => id !== botId);
+      }
+      if (prev.length >= 2) {
+        alert("최대 2개의 호기만 선택할 수 있습니다.");
+        return prev;
+      }
+      return [...prev, botId];
+    });
+  };
+
+  const handleExtractMultiTrends = async () => {
+    if (selectedBots.length !== 2) {
+      alert("정확히 2개의 호기를 선택해야 합니다.");
+      return;
+    }
     setIsTrendLoading(true);
     setResult(null);
+    setAiTrends([]);
     try {
       const bannedKeywords = getBannedKeywords();
-      const res = await fetch('/api/agent-trend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bannedKeywords, style, coreKeyword: trendCoreKeyword }),
+      
+      const promises = selectedBots.map(style => 
+        fetch('/api/agent-trend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bannedKeywords, style, coreKeyword: trendCoreKeyword }),
+        }).then(res => res.json())
+      );
+      
+      const results = await Promise.all(promises);
+      
+      let combinedTrends: any[] = [];
+      let newKeywords: string[] = [];
+      
+      results.forEach(data => {
+        if (data.trends && Array.isArray(data.trends)) {
+          combinedTrends = [...combinedTrends, ...data.trends];
+          newKeywords = [...newKeywords, ...data.trends.map((t: any) => t.keyword)];
+        }
       });
-      const data = await res.json();
-      if (res.ok && data.trends) {
-        setAiTrends(data.trends);
-        saveKeywordHistory(data.trends.map((t: any) => t.keyword));
+      
+      if (combinedTrends.length > 0) {
+        setAiTrends(combinedTrends);
+        saveKeywordHistory(newKeywords);
       } else {
-        alert(data.error || 'AI 트렌드 발굴에 실패했습니다.');
+        alert('AI 트렌드 발굴에 실패했습니다.');
       }
     } catch (e) {
       alert('네트워크 오류가 발생했습니다.');
@@ -363,79 +395,124 @@ export default function Home() {
                   <p className="text-xs text-slate-500">두 번째 블로그 추출 시 위 키워드를 기반으로 연관 롱테일을 찾아옵니다.</p>
                 </div>
 
-                {/* 9 Core Bot Modes */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-slate-300 rounded-md overflow-hidden">
+                {/* 12 Core Bot Modes (2 Columns x 6 Rows) */}
+                <div className="grid grid-cols-2 gap-0 border border-slate-300 rounded-md overflow-hidden bg-slate-200 gap-[1px]">
                   {/* Row 1 */}
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot1')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot1' ? 'bg-green-50/50' : ''}`}>
+                  <button type="button" onClick={() => toggleBotSelection('bot1')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot1') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot1' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot1') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">1호기 (지원금)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">보조금/캐시백 공포</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot2')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot2' ? 'bg-green-50/50' : ''}`}>
+                  <button type="button" onClick={() => toggleBotSelection('bot2')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot2') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot2' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot2') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">2호기 (예적금)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">고금리 특판 마감 자극</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot3')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot3' ? 'bg-green-50/50' : ''}`}>
+                  
+                  {/* Row 2 */}
+                  <button type="button" onClick={() => toggleBotSelection('bot3')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot3') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot3' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot3') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">3호기 (연금/시니어)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">국민연금/건보료 방어</span>
                   </button>
-                  
-                  {/* Row 2 */}
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot4')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot4' ? 'bg-green-50/50' : ''}`}>
+                  <button type="button" onClick={() => toggleBotSelection('bot4')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot4') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot4' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot4') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">4호기 (부동산)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">무순위 줍줍 벼락거지</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot5')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot5' ? 'bg-green-50/50' : ''}`}>
+                  
+                  {/* Row 3 */}
+                  <button type="button" onClick={() => toggleBotSelection('bot5')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot5') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot5' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">5호기 (부동산 대출)</span>
+                      {isTrendLoading && selectedBots.includes('bot5') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">5호기 (대출/정책)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">특례대출/대출한도 축소 공포</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">특례대출/한도 축소</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot6')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot6' ? 'bg-green-50/50' : ''}`}>
+                  <button type="button" onClick={() => toggleBotSelection('bot6')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot6') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot6' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">6호기 (부동산 하락)</span>
+                      {isTrendLoading && selectedBots.includes('bot6') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">6호기 (하락장/경매)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">급매/경매/영끌족 비명</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">마피/경매 영끌족 비명</span>
                   </button>
 
-                  {/* Row 3 */}
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot7')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-b-0 md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot7' ? 'bg-green-50/50' : ''}`}>
+                  {/* Row 4 */}
+                  <button type="button" onClick={() => toggleBotSelection('bot7')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot7') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot7' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot7') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">7호기 (정치/우파)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">보수 안보/경제 이슈</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot8')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-b md:border-b-0 md:border-r border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot8' ? 'bg-green-50/50' : ''}`}>
+                  <button type="button" onClick={() => toggleBotSelection('bot8')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot8') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot8' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot8') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">8호기 (정치/좌파)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">진보 복지/민생 이슈</span>
                   </button>
-                  <button type="button" onClick={() => fetchAiTrendMiner('bot9')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white border-slate-300 hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${activeBlogStyle === 'bot9' ? 'bg-green-50/50' : ''}`}>
+
+                  {/* Row 5 */}
+                  <button type="button" onClick={() => toggleBotSelection('bot9')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot9') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
-                      {isTrendLoading && activeBlogStyle === 'bot9' ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      {isTrendLoading && selectedBots.includes('bot9') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
                       <span className="text-[14px] font-bold text-slate-900 text-left">9호기 (네이트판)</span>
                     </div>
                     <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">커뮤니티 레전드 썰</span>
                   </button>
+                  <button type="button" onClick={() => toggleBotSelection('bot10')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot10') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && selectedBots.includes('bot10') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">10호기 (드라마/연예)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">결말 예측/논란 가십</span>
+                  </button>
+
+                  {/* Row 6 */}
+                  <button type="button" onClick={() => toggleBotSelection('bot11')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot11') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && selectedBots.includes('bot11') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">11호기 (정치인/이슈)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">특정 인물 막말/논란</span>
+                  </button>
+                  <button type="button" onClick={() => toggleBotSelection('bot12')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot12') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
+                    <div className="flex items-center gap-1">
+                      {isTrendLoading && selectedBots.includes('bot12') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
+                      <span className="text-[14px] font-bold text-slate-900 text-left">12호기 (주식/코인)</span>
+                    </div>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">비트코인/테마주 폭등락</span>
+                  </button>
                 </div>
 
-                {renderTrendBlock(aiTrends, "AI 황금 키워드 TOP 5", <Lightbulb className="w-3 h-3"/>, 'emerald', activeBlogStyle)}
+                {selectedBots.length > 0 && (
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={handleExtractMultiTrends}
+                      disabled={selectedBots.length !== 2 || isTrendLoading}
+                      className={`w-full py-4 rounded-lg font-bold text-lg transition-all flex items-center justify-center gap-2 ${
+                        selectedBots.length === 2
+                          ? 'bg-[#00c73c] hover:bg-[#00a833] text-white shadow-lg transform hover:scale-[1.02]'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {isTrendLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6" />}
+                      {selectedBots.length === 2 ? "선택한 2개 연계 호기로 10개 키워드 추출 🚀" : "2개의 연계 호기를 선택해주세요"}
+                    </button>
+                  </div>
+                )}
+
+                {renderTrendBlock(aiTrends, "AI 연계 황금 키워드 TOP 10", <Lightbulb className="w-3 h-3"/>, 'emerald', selectedBots.join(','))}
 
                 <div className="flex items-center gap-3 my-6">
                   <div className="h-px bg-slate-200 flex-1"></div>
@@ -469,7 +546,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={isAnyLoading}
-                onClick={(e) => handleGenerate(e, undefined, activeBlogStyle)}
+                onClick={(e) => handleGenerate(e, undefined, selectedBots[0] || 'general')}
                 className="w-full py-4 text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed bg-[#00c73c] hover:bg-[#00a832] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
@@ -480,7 +557,7 @@ export default function Home() {
                 ) : (
                   <>
                     <PenTool className="w-5 h-5" />
-                    {`입력된 키워드로 포스팅 생성 (${activeBlogStyle} 썸네일)`}
+                    {`입력된 키워드로 포스팅 생성 (${selectedBots[0] || 'general'} 썸네일)`}
                   </>
                 )}
               </button>

@@ -95,14 +95,32 @@ export async function POST(req: Request) {
         target: '10~40대 커뮤니티 이슈/썰 소비층',
         unique1: '네이트판 톡톡, 블라인드 등 온라인 커뮤니티 레전드 썰, 고부갈등, 사이다썰, 연애상담',
         unique2: '대중의 강력한 공감과 감정 이입을 유발하는 온라인 커뮤니티 화제글'
+      },
+      'bot10': {
+        name: '"자동봇 10호기(드라마/연예인 가십 전문)"',
+        target: '10~50대 대중문화/가십 소비층',
+        unique1: '인기 드라마 결말 예측, 예능 프로그램 화제성, 연예인 열애/결혼/이혼 등 가십',
+        unique2: '연예인 과거 논란 및 드라마 충격 전개 등 도파민을 극한으로 자극하는 이슈'
+      },
+      'bot11': {
+        name: '"자동봇 11호기(화제의 인물/정치인 가십 전문)"',
+        target: '정치/사회 인물 가십 관심층',
+        unique1: '특정 정치인(이재명, 장동혁, 한동훈 등) 및 화제 인물의 막말 논란, 재산, 가족사 등 가십',
+        unique2: '정책이나 이념보다는 인물 개인의 흠결, 파격 행보, 논란 등 원초적 호기심 자극'
+      },
+      'bot12': {
+        name: '"자동봇 12호기(주식/비트코인 벼락부자 전문)"',
+        target: '단기 투자 및 한탕주의 관심층',
+        unique1: '비트코인 급등락, 밈코인 대박 사례, 텐배거 주식, 증시 떡상/폭락 테마주',
+        unique2: '벼락부자 성공담 또는 폭락으로 인한 전재산 탕진 등 억 단위의 극단적인 돈의 흐름 자극'
       }
     };
     
-    // 입력된 style(예: blog1, site2_bot2 등)에서 숫자만 추출하여 1~9호기로 강제 맵핑
+    // 입력된 style(예: blog1, site2_bot2 등)에서 숫자만 추출하여 1~12호기로 강제 맵핑
     const numMatch = style.match(/\d+/);
     const styleNumber = numMatch ? parseInt(numMatch[0]) : 1;
-    // 9호기를 초과하는 요청이 오더라도 1~9 안에서 순환하도록 처리
-    const mappedNumber = styleNumber > 9 ? ((styleNumber - 1) % 9) + 1 : styleNumber; 
+    // 12호기를 초과하는 요청이 오더라도 1~12 안에서 순환하도록 처리
+    const mappedNumber = styleNumber > 12 ? ((styleNumber - 1) % 12) + 1 : styleNumber; 
     const botConfig = botConfigs[`bot${mappedNumber}`] || botConfigs['bot1'];
 
     // 크롤링된 실시간 데이터 로드 (collected_trends.csv)
@@ -118,10 +136,14 @@ export async function POST(req: Request) {
            // 해당 봇의 타겟 키워드가 포함된 줄만 필터링 (간이 필터링)
            if ([7, 8].includes(mappedNumber) && line.includes('정치')) {
               filteredLines.push(line);
-           } else if (mappedNumber === 9 && (line.includes('네이트판') || line.includes('이슈'))) {
+           } else if ([9, 10].includes(mappedNumber) && (line.includes('네이트판') || line.includes('이슈') || line.includes('도파민'))) {
               filteredLines.push(line);
-           } else if (![7, 8, 9].includes(mappedNumber)) {
-              filteredLines.push(line); // 1~6호기는 전체 제공
+           } else if (mappedNumber === 11 && (line.includes('정치') || line.includes('이슈'))) {
+              filteredLines.push(line);
+           } else if (mappedNumber === 12 && (line.includes('예적금') || line.includes('부동산') || line.includes('이슈'))) {
+              filteredLines.push(line);
+           } else if (![7, 8, 9, 10, 11, 12].includes(mappedNumber)) {
+              filteredLines.push(line); // 1~6호기는 전체 제공 (주로 경제/부동산/복지)
            }
         }
         
