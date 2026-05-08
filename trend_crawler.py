@@ -11,6 +11,11 @@ import subprocess
 import hmac
 import hashlib
 import base64
+import sys
+
+# 윈도우 콘솔 환경에서 이모지 출력 시 발생하는 cp949 인코딩 에러 방지
+if sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # .env.local 파일에서 환경변수 로드 (로컬 환경인 경우)
 if not os.getenv('GITHUB_ACTIONS_ENV'):
@@ -32,23 +37,25 @@ NAVER_AD_SECRET_KEY = os.getenv('NAVER_AD_SECRET_KEY')
 # 저장할 CSV 파일 경로
 CSV_FILE = 'collected_trends.csv'
 
-# 다음 뉴스 수집
+# 다음 뉴스 (메인 및 인기 랭킹) 수집
 def fetch_daum_news():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
-    url = 'https://news.daum.net/'
+    urls = ['https://news.daum.net/', 'https://news.daum.net/ranking/popular']
+    headlines = []
+    
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        headlines = []
-        for a in soup.find_all('a'):
-            href = a.get('href', '')
-            title = a.text.strip()
-            if 'v.daum.net/v/' in href and title and title not in headlines:
-                headlines.append(title)
+        for url in urls:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            for a in soup.find_all('a'):
+                href = a.get('href', '')
+                title = a.text.strip()
+                if 'v.daum.net/v/' in href and title and title not in headlines:
+                    headlines.append(title)
         
         # 중복 제거 및 리스트 반환 (최대 50개)
         unique_headlines = list(dict.fromkeys(headlines))[:50]
