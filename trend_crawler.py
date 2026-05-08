@@ -246,7 +246,13 @@ def extract_golden_keywords_with_gemini(daum_headlines, nate_stories, strategy):
         return []
 
 def run_crawler():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 크롤링 및 키워드 정제 시작...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 최신 데이터 동기화 (Git Pull)...")
+    try:
+        subprocess.run(['git', 'pull', '--rebase'], check=True, cwd=os.getcwd(), capture_output=True)
+    except Exception as e:
+        print(f"Git Pull 실패 (무시하고 진행): {e}")
+
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 크롤링 및 키워드 정제 시작...")
     
     new_data = []
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
