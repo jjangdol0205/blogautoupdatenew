@@ -401,9 +401,9 @@ export default function Home() {
                   <button type="button" onClick={() => toggleBotSelection('bot1')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot1') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && selectedBots.includes('bot1') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">1호기 (지원금)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">1호기 (청약/분양)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">보조금/캐시백 공포</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">아파트 청약/분양가 상한제</span>
                   </button>
                   <button type="button" onClick={() => toggleBotSelection('bot2')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot2') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
@@ -465,32 +465,32 @@ export default function Home() {
                   <button type="button" onClick={() => toggleBotSelection('bot9')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot9') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && selectedBots.includes('bot9') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">9호기 (네이트판)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">9호기 (서울 핵심지)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">커뮤니티 레전드 썰</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">강남/마용성 호재/시세</span>
                   </button>
                   <button type="button" onClick={() => toggleBotSelection('bot10')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot10') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && selectedBots.includes('bot10') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">10호기 (드라마/연예)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">10호기 (재건축/정비)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">결말 예측/논란 가십</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">서울 정비사업/모아타운</span>
                   </button>
 
                   {/* Row 6 */}
                   <button type="button" onClick={() => toggleBotSelection('bot11')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot11') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && selectedBots.includes('bot11') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">11호기 (정치인/이슈)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">11호기 (경기 남부)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">특정 인물 막말/논란</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">동탄/용인 반도체 호재</span>
                   </button>
                   <button type="button" onClick={() => toggleBotSelection('bot12')} disabled={isAnyLoading} className={`w-full px-4 py-4 bg-white hover:bg-slate-50 flex flex-col items-start gap-1 transition-colors ${selectedBots.includes('bot12') ? 'bg-green-100 ring-2 ring-inset ring-green-500' : ''}`}>
                     <div className="flex items-center gap-1">
                       {isTrendLoading && selectedBots.includes('bot12') ? <Loader2 className="w-4 h-4 animate-spin text-green-600" /> : <Sparkles className="w-4 h-4 text-black" />}
-                      <span className="text-[14px] font-bold text-slate-900 text-left">12호기 (주식/코인)</span>
+                      <span className="text-[14px] font-bold text-slate-900 text-left">12호기 (경기 북부)</span>
                     </div>
-                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">비트코인/테마주 폭등락</span>
+                    <span className="text-[12px] font-normal text-slate-600 leading-tight text-left">1기신도시/GTX 역세권</span>
                   </button>
                 </div>
 

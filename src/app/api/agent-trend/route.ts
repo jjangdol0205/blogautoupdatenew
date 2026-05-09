@@ -43,10 +43,10 @@ export async function POST(req: Request) {
 
     const botConfigs: Record<string, any> = {
       'bot1': {
-        name: '"자동봇 1호기(지원금/복지 전문)"',
-        target: '전국민',
-        unique1: '정부 보조금, 숨은 정부 지원금, 캐시백 혜택 (예: 2026 소상공인 추경지원금, 고유가 피해지원금)',
-        unique2: '지원금 마감 임박 및 미신청 시 금전적 손실 공포 자극'
+        name: '"자동봇 1호기(청약/분양 전문)"',
+        target: '무주택자 및 내 집 마련 준비생',
+        unique1: '아파트 청약 일정, 분양가 상한제, 무순위 청약(줍줍), 신규 분양 단지 정보',
+        unique2: '청약 당첨 시의 막대한 시세차익 강조 및 청약 가점 계산, 특별공급 자격'
       },
       'bot2': {
         name: '"자동봇 2호기(예적금/특판 전문)"',
@@ -91,28 +91,28 @@ export async function POST(req: Request) {
         unique2: '인물 중심의 정치 지형 분석 및 지방선거 여론조사 결과를 바탕으로 한 좌파 결집 이슈'
       },
       'bot9': {
-        name: '"자동봇 9호기(네이트판/온라인 썰 전문)"',
-        target: '10~40대 커뮤니티 이슈/썰 소비층',
-        unique1: '네이트판 톡톡, 블라인드 등 온라인 커뮤니티 레전드 썰, 고부갈등, 사이다썰, 연애상담',
-        unique2: '대중의 강력한 공감과 감정 이입을 유발하는 온라인 커뮤니티 화제글'
+        name: '"자동봇 9호기(서울 핵심지 부동산 전문)"',
+        target: '서울 입성 희망자 및 부동산 투자자',
+        unique1: '강남 3구, 마용성, 성수 등 서울 핵심 입지 아파트 시세, 실거래가, 호재 분석',
+        unique2: '상급지 갈아타기 열망 자극 및 "지금 아니면 영원히 못 산다"는 상실감'
       },
       'bot10': {
-        name: '"자동봇 10호기(드라마/연예인 가십 전문)"',
-        target: '10~50대 대중문화/가십 소비층',
-        unique1: '인기 드라마 결말 예측, 예능 프로그램 화제성, 연예인 열애/결혼/이혼 등 가십',
-        unique2: '연예인 과거 논란 및 드라마 충격 전개 등 도파민을 극한으로 자극하는 이슈'
+        name: '"자동봇 10호기(서울 재건축/재개발 전문)"',
+        target: '정비사업 투자자 및 재건축 조합원',
+        unique1: '신속통합기획, 모아타운, 노후계획도시 특별법 등 서울 주요 재건축/재개발 구역 정보',
+        unique2: '재건축 초과이익 환수제 완화 및 사업성 분석, 프리미엄(P) 폭등 사례 조명'
       },
       'bot11': {
-        name: '"자동봇 11호기(화제의 인물/정치인 가십 전문)"',
-        target: '정치/사회 인물 가십 관심층',
-        unique1: '특정 정치인(이재명, 장동혁, 한동훈 등) 및 화제 인물의 막말 논란, 재산, 가족사 등 가십',
-        unique2: '정책이나 이념보다는 인물 개인의 흠결, 파격 행보, 논란 등 원초적 호기심 자극'
+        name: '"자동봇 11호기(경기 남부 반도체 벨트 전문)"',
+        target: '수도권 거주자 및 직주근접 수요자',
+        unique1: '용인 반도체 클러스터, 동탄, 수원, 평택 등 경기 남부 핵심지 아파트 호재 및 분양',
+        unique2: '일자리 창출에 따른 집값 폭등 사례 자극 및 "강남 부럽지 않은 자족도시" 프레임'
       },
       'bot12': {
-        name: '"자동봇 12호기(주식/비트코인 벼락부자 전문)"',
-        target: '단기 투자 및 한탕주의 관심층',
-        unique1: '비트코인 급등락, 밈코인 대박 사례, 텐배거 주식, 증시 떡상/폭락 테마주',
-        unique2: '벼락부자 성공담 또는 폭락으로 인한 전재산 탕진 등 억 단위의 극단적인 돈의 흐름 자극'
+        name: '"자동봇 12호기(경기 북부/GTX 역세권 전문)"',
+        target: '수도권 외곽 거주자 및 교통망 투자자',
+        unique1: 'GTX-A/B/C 노선 수혜지, 1기 신도시(일산, 중동 등) 재건축, 파주/고양 등 경기 북부 호재',
+        unique2: 'GTX 개통 임박으로 인한 교통 혁명 및 "반값에 강남 출퇴근" 가능성 자극'
       }
     };
     
@@ -136,14 +136,8 @@ export async function POST(req: Request) {
            // 해당 봇의 타겟 키워드가 포함된 줄만 필터링 (간이 필터링)
            if ([7, 8].includes(mappedNumber) && line.includes('정치')) {
               filteredLines.push(line);
-           } else if ([9, 10].includes(mappedNumber) && (line.includes('네이트판') || line.includes('이슈') || line.includes('도파민'))) {
-              filteredLines.push(line);
-           } else if (mappedNumber === 11 && (line.includes('정치') || line.includes('이슈'))) {
-              filteredLines.push(line);
-           } else if (mappedNumber === 12 && (line.includes('예적금') || line.includes('부동산') || line.includes('이슈'))) {
-              filteredLines.push(line);
-           } else if (![7, 8, 9, 10, 11, 12].includes(mappedNumber)) {
-              filteredLines.push(line); // 1~6호기는 전체 제공 (주로 경제/부동산/복지)
+           } else if (![7, 8].includes(mappedNumber)) {
+              filteredLines.push(line); // 1~6, 9~12호기는 전체 제공 (주로 경제/부동산/복지)
            }
         }
         
@@ -171,11 +165,11 @@ export async function POST(req: Request) {
 * (지시사항): 당신이 생성하는 트렌드 제목은 점잖고 평범한 뉴스 헤드라인이 절대 아닙니다. 위 4가지 패턴을 조합하여 매우 '엣지(Edge) 있고 도발적인' 톤앤매너로, 독자가 클릭하지 않고는 못 배기도록 강력하게 후킹하세요.
 `;
 
-    // 정치/썰 봇(7,8,9호기)은 경제/사회 위주의 어드바이저 데이터를 원천 차단하여 오작동(자녀장려금 등 강제 할당) 방지
-    if ([7, 8, 9].includes(mappedNumber)) {
-      feedbackLearningGuidance += crawledData; // 7,8,9호기는 크롤링 데이터만 제공 (어드바이저 및 템플릿 완전 배제)
+    // 정치 봇(7, 8호기)은 경제/사회 위주의 어드바이저 데이터를 원천 차단하여 오작동 방지
+    if ([7, 8].includes(mappedNumber)) {
+      feedbackLearningGuidance += crawledData; // 7,8호기는 크롤링 데이터만 제공 (어드바이저 및 템플릿 완전 배제)
     } else {
-      feedbackLearningGuidance += creatorAdvisorData + hookingPatterns + crawledData; // 1~6호기는 어드바이저 + 후킹 패턴 + 크롤링 데이터 모두 제공 종합 세트
+      feedbackLearningGuidance += creatorAdvisorData + hookingPatterns + crawledData; // 나머지 호기는 어드바이저 + 후킹 패턴 + 크롤링 데이터 모두 제공 종합 세트
     }
 
     let prompt = `
